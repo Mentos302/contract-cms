@@ -21,12 +21,10 @@ class RolePermissionsSeeder extends Seeder {
 		$customer_role = Role::create( [ 'name' => 'customer' ] );
 
 		$admin = User::create( [ 
-			'name' => 'Admin',
 			'email' => 'admin@gmail.com',
 			'password' => Hash::make( '12345678' ),
 		] );
 		$customer = User::create( [ 
-			'name' => 'Customer',
 			'email' => 'customer@gmail.com',
 			'password' => Hash::make( '12345678' ),
 		] );
