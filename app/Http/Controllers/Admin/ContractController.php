@@ -34,7 +34,7 @@ class ContractController extends Controller {
 		return view( 'admin.contract.index', compact( 'contracts' ) );
 	}
 	public function create() {
-		$customers = User::role( 'customer' )->pluck( 'name', 'id' );
+		$customers = User::role( 'customer' )->pluck( 'first_name', 'id' );
 		$types = Type::pluck( 'name', 'id' );
 		$manufacturers = Manufacturer::pluck( 'name', 'id' );
 		$distributors = Distributor::pluck( 'name', 'id' );
@@ -50,6 +50,7 @@ class ContractController extends Controller {
 		$requestData['customer_id'] = $request->customer_id;
 		$requestData['number'] = rand( 10000, 99999 ) . Contract::count();
 
+
 		if ( $request->has( 'contract_price' ) && $request->has( 'contract_cost' ) ) {
 			$requestData['contract_revenue'] = $request->contract_price - $request->contract_cost;
 		}
@@ -64,7 +65,7 @@ class ContractController extends Controller {
 	}
 	public function edit( $id ) {
 		$contract = Contract::findOrFail( $id );
-		$customers = User::role( 'customer' )->pluck( 'name', 'id' );
+		$customers = User::role( 'customer' )->pluck( 'first_name', 'id' );
 		$types = Type::pluck( 'name', 'id' );
 		$manufacturers = Manufacturer::pluck( 'name', 'id' );
 		$distributors = Distributor::pluck( 'name', 'id' );
@@ -75,9 +76,14 @@ class ContractController extends Controller {
 		$contract = Contract::findOrFail( $id );
 		$requestData = $request->validated();
 		$requestData['customer_id'] = $request->customer_id;
+
 		if ( $request->has( 'contract_price' ) && $request->has( 'contract_cost' ) ) {
 			$requestData['contract_revenue'] = $request->contract_price - $request->contract_cost;
 		}
+
+		$requestData['serial_number'] = $request->serial_number;
+		$requestData['mfr_contract_number'] = $request->mfr_contract_number;
+		$requestData['name'] = $request->name;
 		$contract->update( $requestData );
 
 		// $startDate = Carbon::parse($requestData['start_date']);
@@ -85,11 +91,11 @@ class ContractController extends Controller {
 		// $contract->renewal_date= $renewalDate->format('Y-m-d');
 		// $contract->save();
 
-		return redirect()->route( 'contract.index' )->with( 'success', 'Contract updated Successfully.' );
+		return redirect()->route( 'contract.index' )->with( 'success', 'Contract updated successfully.' );
 	}
 	public function destroy( Request $request, $id ) {
 		$contract = Contract::findOrFail( $id );
 		$contract->delete();
-		return redirect()->route( 'contract.index' )->with( 'delete', 'Contract deleted Successfully.' );
+		return redirect()->route( 'contract.index' )->with( 'delete', 'Contract deleted successfully.' );
 	}
 }

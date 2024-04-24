@@ -66,14 +66,20 @@
                 @can('renewal.index')
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('renewal') ? 'active' : '' }}"
+                            href="{{ route('contract.index') }}" aria-expanded="false">
+                            <i class="ri-file-list-2-line"></i> <span>All Contracts</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link menu-link {{ request()->is('renewal') ? 'active' : '' }}"
                             href="{{ route('renewal.index') }}" aria-expanded="false">
-                            <i class="ri-building-2-line"></i> <span>All Renewals</span>
+                            <i class="ri-refresh-line"></i> <span>All Renewals</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('renewal/create') ? 'active' : '' }}"
                             href="{{ route('renewal.index') }}/create" aria-expanded="false">
-                            <i class="ri-building-2-line"></i> <span>New Renewal</span>
+                            <i class="ri-add-line"></i> <span>New Renewal</span>
                         </a>
                     </li>
                 @endcan
@@ -81,7 +87,7 @@
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('type*') ? 'active' : '' }}"
                             href="{{ route('type.index') }}" aria-expanded="false">
-                            <i class="ri-building-2-line"></i> <span>Renewals Types</span>
+                            <i class="ri-folder-settings-line"></i> <span>Renewals Types</span>
                         </a>
                     </li>
                 @endcan
@@ -89,10 +95,11 @@
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('manufacturer*') ? 'active' : '' }}"
                             href="{{ route('manufacturer.index') }}" aria-expanded="false">
-                            <i class=" ri-database-fill"></i> <span>Manufacturers</span>
+                            <i class="ri-archive-line"></i> <span>Manufacturers</span>
                         </a>
                     </li>
                 @endcan
+
                 @can('distributor.index')
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('distributor*') ? 'active' : '' }}"

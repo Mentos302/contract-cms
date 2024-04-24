@@ -43,7 +43,7 @@ class RenewalController extends Controller {
 			->map( function ($contract) {
 				return [ 
 					'id' => $contract->id,
-					'value' => $contract->distributor ? $contract->distributor->name . ' - ' . $contract->number : $contract->number,
+					'value' => $contract->distributor ? $contract->number . ' - ' . $contract->distributor->name : $contract->number,
 				];
 			} )
 			->pluck( 'value', 'id' );

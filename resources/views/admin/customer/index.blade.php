@@ -52,9 +52,10 @@
                                                 <span class="d-flex align-items-center">
                                                     <img class="rounded-circle header-profile-user"
                                                         src="{{ asset($item->avatar ? $item->avatar : 'build/images/users/avatar.svg') }}"
-                                                        alt="{{ $item->name }}">
+                                                        alt="{{ $item->first_name }} {{ $item->last_name }}">
                                                     <span
-                                                        class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ $item->name }}</span>
+                                                        class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ $item->first_name }}
+                                                        {{ $item->last_name }}</span>
                                                 </span>
                                             </td>
                                             <td>{{ $item->email }}</td>

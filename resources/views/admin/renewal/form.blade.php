@@ -44,7 +44,7 @@
                                     @foreach ($contracts as $key => $item)
                                         <option value="{{ $key }}"
                                             {{ (isset($renewal) && $renewal->contract_id == $key) || old('contract_id') == $key ? "selected='selected'" : '' }}>
-                                            {{ $item }}</option>
+                                            #{{ $item }}</option>
                                     @endforeach
                                 </select>
                             @endif

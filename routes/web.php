@@ -19,15 +19,17 @@ Route::get( '/', function () {
 	return redirect()->route( 'login' );
 } );
 
-// Route::get('/register', function () {
-//     return redirect()->route('login');
-// });
+// Route::get( '/register', function () {
+// 	return redirect()->route( 'login' );
+// } );
 
 Route::group( [ 'middleware' => 'auth' ], function () {
 	//Update User Details
 	Route::get( 'profile', [ App\Http\Controllers\Auth\ProfileController::class, 'profile' ] )->name( 'user.profile' );
 	Route::post( '/update-profile/{id}', [ App\Http\Controllers\Auth\ProfileController::class, 'updateProfile' ] )->name( 'updateProfile' );
 	Route::post( '/update-password/{id}', [ App\Http\Controllers\Auth\ProfileController::class, 'updatePassword' ] )->name( 'updatePassword' );
+	Route::post( '/avatar/update/{id}', [ App\Http\Controllers\Auth\ProfileController::class, 'updateAvatar' ] )->name( 'avatar.update' );
+	Route::post( '/company-logo/update/{id}', [ App\Http\Controllers\Auth\ProfileController::class, 'updateCompanyLogo' ] )->name( 'company.logo.update' );
 
 	Route::get( 'index/{locale}', [ App\Http\Controllers\HomeController::class, 'lang' ] );
 	Route::get( '/home', [ App\Http\Controllers\HomeController::class, 'index' ] )->name( 'home' );

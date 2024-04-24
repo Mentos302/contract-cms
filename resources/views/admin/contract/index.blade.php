@@ -38,68 +38,40 @@
                             <table class="table align-middle table-nowrap mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Number</th>
-                                        <th scope="col">Customer</th>
+                                        <th scope="col">Quote</th>
+                                        <th scope="col">MFR/Soft</th>
                                         <th scope="col">Type</th>
-                                        <th scope="col">Manufacturer</th>
-                                        @if (Auth::user()->hasRole('admin'))
-                                            <th scope="col">Distributor</th>
-                                        @endif
+                                        <th scope="col">Serial Number</th>
+                                        <th scope="col">Contract Number</th>
                                         <th scope="col">Term</th>
                                         <th scope="col">Start date</th>
                                         <th scope="col">End date</th>
                                         <th scope="col">Contract price</th>
-                                        @if (Auth::user()->hasRole('admin'))
-                                            <th scope="col">Contract cost</th>
-                                            <th scope="col">Contract revenue</th>
-                                        @endif
+                                        <th scope="col">Name (optional)</th>
                                         <th scope="col">Location</th>
-                                        @if (Auth::user()->hasRole('admin'))
-                                            <th scope="col">Action</th>
-                                        @endif
+                                        <th scope="col"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($contracts as $key => $item)
                                         <tr>
-                                            <th scope="row">{{ $key + 1 }}</th>
-                                            <th>#{{ $item->number }}</th>
-                                            <td>{{ $item->customer->name }}</td>
-                                            <td>{{ $item->type->name }}</td>
+                                            <td><a href="{{ route('contract.show', $item->id) }}">#{{ $item->number }}</a>
+                                            </td>
                                             <td>{{ $item->manufacturer->name }}</td>
-                                            @if (Auth::user()->hasRole('admin'))
-                                                <td>{{ isset($item->distributor) ? $item->distributor->name : '' }}</td>
-                                            @endif
+                                            <td>{{ $item->type->name }}</td>
+                                            <td>{{ $item->serial_number }}</td>
+                                            <td>{{ $item->mfr_contract_number }}</td>
                                             <td>{{ $item->term->name }} Year</td>
-                                            <td>{{ $item->start_date }}</td>
-                                            <td>{{ $item->end_date }}</td>
+                                            <td>{{ formatDate($item->start_date) }}</td>
+                                            <td>{{ formatDate($item->end_date) }}</td>
                                             <td>${{ $item->contract_price }}</td>
-                                            @if (Auth::user()->hasRole('admin'))
-                                                <td>{{ $item->contract_cost }}</td>
-                                                <td>{{ $item->contract_revenue }}</td>
-                                            @endif
+                                            <td>{{ $item->name }}</td>
                                             <td>{{ $item->location }}</td>
-                                            @if (Auth::user()->hasRole('admin'))
+                                            @if (!Auth::user()->hasRole('admin'))
                                                 <td>
-                                                    <div class="d-flex">
-                                                        <a href="{{ route('contract.edit', $item->id) }}"
-                                                            class="btn btn-success btn-icon waves-effect waves-light"><i
-                                                                class=" ri-pencil-fill"></i></a>
-                                                        {{-- <a style="margin-left: 5px;" href="{{route('contract.show', $item->id)}}" class="btn btn-success btn-icon waves-effect waves-light"><i class=" ri-eye-fill"></i></a> --}}
-                                                        <form action="{{ route('contract.destroy', $item->id) }}"
-                                                            method="POST">
-                                                            @method('DELETE')
-                                                            @csrf
-                                                            <button onclick="return confirm('Are you sure to delete Item?')"
-                                                                class="btn btn-danger btn-icon waves-effect waves-light"
-                                                                type="submit" style="margin-left:0.3rem"><i
-                                                                    class="ri-delete-bin-5-line"></i></button>
-                                                        </form>
-                                                    </div>
+                                                    <a href="#" class="btn btn-primary">Request a Quote</a>
                                                 </td>
                                             @endif
-
                                         </tr>
                                     @endforeach
                                 </tbody>

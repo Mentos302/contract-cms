@@ -170,7 +170,8 @@
                                 alt="Header Avatar">
                             <span class="text-start ms-xl-2">
                                 <span
-                                    class="d-none d-xl-inline-block ms-1 fw-medium user-name-text text-capitalize">{{ Auth::user()->name }}</span>
+                                    class="d-none d-xl-inline-block ms-1 fw-medium user-name-text text-capitalize">{{ Auth::user()->first_name }}
+                                    {{ Auth::user()->last_name }}</span>
                                 <span
                                     class="d-none d-xl-block ms-1 fs-12 user-name-sub-text text-capitalize">{{ Auth::user()->getRoleNames()[0] }}</span>
                             </span>
@@ -178,7 +179,7 @@
                     </button>
                     <div class="dropdown-menu dropdown-menu-end">
                         <!-- item-->
-                        <h6 class="dropdown-header">Welcome {{ Auth::user()->name }}!</h6>
+                        <h6 class="dropdown-header">Welcome {{ Auth::user()->first_name }}!</h6>
                         <a class="dropdown-item" href="{{ route('user.profile') }}"><i
                                 class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span
                                 class="align-middle">Profile</span></a>

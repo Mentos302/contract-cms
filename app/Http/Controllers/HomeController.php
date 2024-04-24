@@ -82,25 +82,15 @@ class HomeController extends Controller {
 			'close_lost_revenue',
 			'revenue_and_count',
 		) );
-		// // Retrieve contract data from the database
-		// $contracts = Contract::paginate(15);
-		// // Calculate monthly, quarterly, and annual costs for each contract
-		// foreach ($contracts as $contract) {
-		//     // Perform calculations and store the results in the contract object
-		//     $contract->monthly_cost = $this->calculateMonthlyCost($contract);
-		//     $contract->quarterly_cost = $this->calculateQuarterlyCost($contract);
-		//     $contract->annual_cost = $this->calculateAnnualCost($contract);
-		//     // $contract->profit_margin = $this->calculateProfitMargin($contract);
-		// }
-		// $profit_revenue= $this->calculateYearlyProfitRevenue();
-		//  dd($profit_revenue);
 	}
 	public function getActiveContarcts() {
 		$user = auth()->user();
 		$qry = Contract::query();
+
 		if ( $user->hasRole( 'customer' ) ) {
 			$qry->where( 'customer_id', $user->id );
 		}
+
 		return $qry->where( 'start_date', '<=', now() )
 			->where( 'end_date', '>=', now() )->get();
 	}
@@ -127,13 +117,21 @@ class HomeController extends Controller {
 	public function notRenewingContracts() {
 		$user = auth()->user();
 		$qry = Contract::query();
+
 		if ( $user->hasRole( 'customer' ) ) {
 			$qry->where( 'customer_id', $user->id );
 		}
+
 		return $qry
-			->whereDoesntHave( 'renewals', function ($query) {
-				$query->where( 'status', 'Open' );
+			->where( function ($query) {
+				$query->whereHas( 'renewals', function ($q) {
+					$q->where( 'status', 'Close lost' );
+				} )->orWhere( function ($query) {
+					$query->doesntHave( 'renewals' )
+						->whereDate( 'end_date', '<', now()->subDays( 15 ) );
+				} );
 			} )
+
 			->get();
 	}
 	public function contractsStatus( Request $request ) {
@@ -226,6 +224,7 @@ class HomeController extends Controller {
 
 		return [ $sumCloseLostRevenue, $countCloseLostContracts ];
 	}
+
 
 
 	public function revenueCount() {

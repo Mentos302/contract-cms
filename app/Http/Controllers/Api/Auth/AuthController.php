@@ -24,7 +24,6 @@ class AuthController extends Controller {
 	}
 
 	public function login( Request $request ) {
-		return '123';
 		$validator = Validator::make( $request->all(), [ 
 			'email' => [ 'required', 'email' ],
 			'password' => [ 'required' ],
@@ -36,7 +35,6 @@ class AuthController extends Controller {
 			return response()->json( $rtn, 422 );
 		}
 
-		return dd( $request->email );
 		if ( Auth::attempt( [ 'email' => $request->email, 'password' => $request->password ] ) ) {
 			$user = Auth::user();
 			$success['token'] = $user->createToken( 'SanctumAPI' )->plainTextToken;
