@@ -113,7 +113,7 @@
                                             <label for="emailInput" class="form-label">Email Address</label>
                                             <input type="email" class="form-control" id="emailInput"
                                                 placeholder="Enter your email" name="email" value="{{ $user->email }}"
-                                                required>
+                                                required readonly>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">

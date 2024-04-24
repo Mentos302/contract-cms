@@ -34,13 +34,21 @@ class ContractController extends Controller {
 		return view( 'admin.contract.index', compact( 'contracts' ) );
 	}
 	public function create() {
-		$customers = User::role( 'customer' )->pluck( 'first_name', 'id' );
+		$customers = User::role( 'customer' )->get()->map( function ($customer) {
+			return [ 
+				'id' => $customer->id,
+				'name' => $customer->first_name . ' ' . $customer->last_name
+			];
+		} )->pluck( 'name', 'id' );
+
 		$types = Type::pluck( 'name', 'id' );
 		$manufacturers = Manufacturer::pluck( 'name', 'id' );
 		$distributors = Distributor::pluck( 'name', 'id' );
 		$terms = Term::pluck( 'name', 'id' );
+
 		return view( 'admin.contract.form', compact( 'customers', 'types', 'manufacturers', 'distributors', 'terms' ) );
 	}
+
 	public function show( $id ) {
 		$contract = Contract::findOrFail( $id );
 		return view( 'admin.contract.show', compact( 'contract' ) );
@@ -65,7 +73,12 @@ class ContractController extends Controller {
 	}
 	public function edit( $id ) {
 		$contract = Contract::findOrFail( $id );
-		$customers = User::role( 'customer' )->pluck( 'first_name', 'id' );
+		$customers = User::role( 'customer' )->get()->map( function ($customer) {
+			return [ 
+				'id' => $customer->id,
+				'name' => $customer->first_name . ' ' . $customer->last_name
+			];
+		} )->pluck( 'name', 'id' );
 		$types = Type::pluck( 'name', 'id' );
 		$manufacturers = Manufacturer::pluck( 'name', 'id' );
 		$distributors = Distributor::pluck( 'name', 'id' );

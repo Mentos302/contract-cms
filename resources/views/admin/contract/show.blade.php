@@ -21,9 +21,12 @@
                     @if (Auth::user()->hasRole('admin'))
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Customer</label>
-                            <input type="text" class="form-control" value="{{ $contract->customer->name }}" readonly />
+                            <input type="text" class="form-control"
+                                value="{{ $contract->customer->first_name }} {{ $contract->customer->last_name }}"
+                                readonly />
                         </div>
                     @endif
+
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Type</label>
                         <input type="text" class="form-control" value="{{ $contract->type->name }}" readonly />

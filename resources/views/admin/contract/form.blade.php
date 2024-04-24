@@ -27,21 +27,26 @@
                     <div class="row">
                         @if (Auth::user()->hasRole('admin'))
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Select Customer <a href="{{ route('customer.index') }}/create"
-                                        class="new-contract-btn btn btn-primary btn-sm">
-                                        Add New</a></label>
+                                <label class="form-label">Customer
+                                    <a href="{{ route('customer.index') }}/create"
+                                        class="new-contract-btn btn btn-primary btn-sm">Add New</a>
+                                </label>
                                 <select class="form-control" name="customer_id" required>
                                     <option value=""> Select Customer</option>
-                                    @foreach ($customers as $key => $item)
-                                        <option value="{{ $key }}"
-                                            {{ (isset($contract) && $contract->customer_id == $key) || old('customer_id') == $key ? "selected='selected'" : '' }}>
-                                            {{ $item }}</option>
+                                    @foreach ($customers as $customerId => $customerName)
+                                        <option value="{{ $customerId }}"
+                                            {{ isset($contract) && ($contract->customer_id == $customerId || old('customer_id') == $customerId) ? 'selected' : '' }}>
+                                            {{ $customerName }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                         @else
-                            <input type="hidden" readonly class="form-control" name="customer_id"
-                                value="{{ Auth::user()->id }}" />
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Customer</label>
+                                <input type="text" readonly class="form-control" value="{{ Auth::user()->id }}" />
+                                <input type="hidden" name="customer_id" value="{{ Auth::user()->id }}" />
+                            </div>
                         @endif
 
                         <div class="col-md-3 mb-3">

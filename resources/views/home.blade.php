@@ -16,8 +16,11 @@
                     <div class="col-12">
                         <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                             <div class="flex-grow-1">
-                                <h4 class="fs-16 mb-1">Hello, {{ Auth::user()->first_name }}!</h4>
-                                <p class="text-muted mb-0">Here's what's happening with your contracts:</p>
+                                @if (Auth::user()->first_name)
+                                    <h4 class="fs-16 mb-1">Hello, {{ Auth::user()->first_name }}!</h4>
+                                @endif
+                                <p class="text-muted mb-0">Here's what's happening with your
+                                    {{ Auth::user()->hasRole('admin') ? 'renewals' : 'contracts' }}:</p>
                             </div>
                         </div><!-- end card header -->
                     </div>
@@ -351,7 +354,7 @@
                                     </div><!-- end card header -->
 
                                     <div class="card-body">
-                                        <div id="pipeline_by_manufacturer" data-colors='["--vz-success"]'
+                                        <div id="pipeline_by_manufacturer" data-colors='["--vz-primary"]'
                                             class="apex-charts" dir="ltr"></div>
                                     </div><!-- end card-body -->
                                 </div><!-- end card -->
@@ -441,22 +444,22 @@
     <script>
         let graphDates = {!! json_encode($profit_revenue['graphDates']) !!};
         let graphValues = {!! json_encode($profit_revenue['graphValues']) !!};
+        let graphContracts = {!! json_encode($profit_revenue['graphContracts']) !!};
 
+        console.log(graphDates, graphValues, graphContracts);
         var linechartcustomerColors = getChartColorsArray("contracts_charts");
         if (linechartcustomerColors) {
             var options = {
-
                 series: [{
-                        name: "Contract",
+                        name: "Revenue",
                         type: "area",
                         data: graphValues,
                     },
                     {
-                        name: "Value",
-                        type: "bar",
-                        data: graphValues
+                        name: "Contracts",
+                        type: "line",
+                        data: graphContracts,
                     },
-
                 ],
                 chart: {
                     height: 600,
@@ -467,101 +470,52 @@
                 },
                 stroke: {
                     curve: "straight",
-                    dashArray: [0, 0, 8],
-                    width: [2, 0, 2.2],
+                    width: [2, 2],
                 },
                 fill: {
-                    opacity: [0.1, 0.9, 1],
+                    opacity: [0.1, 1],
                 },
                 markers: {
-                    size: [0, 0, 0],
-                    strokeWidth: 2,
-                    hover: {
-                        size: 4,
-                    },
+                    size: [0, 4],
                 },
                 xaxis: {
                     categories: graphDates,
-                    axisTicks: {
-                        show: false,
-                    },
-                    axisBorder: {
-                        show: false,
-                    },
                 },
+                yaxis: [{
+                        title: {
+                            text: "Revenue (USD)",
+                        },
+                        labels: {
+                            formatter: function(val) {
+                                return "$" + val.toFixed(2);
+                            },
+                        },
+                    },
+                    {
+                        opposite: true,
+                        title: {
+                            text: "Contracts",
+                        },
+                        labels: {
+                            formatter: function(val) {
+                                return Math.round(val);
+                            },
+                        },
+
+                        max: Math.max(...graphContracts) * 1.1,
+                    },
+                ],
                 grid: {
-                    show: true,
-                    xaxis: {
-                        lines: {
-                            show: true,
-                        },
-                    },
-                    yaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                    padding: {
-                        top: 0,
-                        right: -2,
-                        bottom: 15,
-                        left: 10,
-                    },
+                    borderColor: "#f1f1f1",
                 },
                 legend: {
-                    show: true,
-                    horizontalAlign: "center",
-                    offsetX: 0,
-                    offsetY: -5,
-                    markers: {
-                        width: 9,
-                        height: 9,
-                        radius: 6,
-                    },
-                    itemMargin: {
-                        horizontal: 10,
-                        vertical: 0,
-                    },
-                },
-                plotOptions: {
-                    bar: {
-                        columnWidth: "30%",
-                        barHeight: "70%",
-                    },
-                },
-                dataLabels: {
-                    enabled: true
+                    position: "top",
+                    horizontalAlign: "left",
+                    offsetX: 40,
                 },
                 colors: linechartcustomerColors,
-                tooltip: {
-                    shared: true,
-                    y: [{
-                            formatter: function(y) {
-                                if (typeof y !== "undefined") {
-                                    return y.toFixed(0);
-                                }
-                                return y;
-                            },
-                        },
-                        {
-                            formatter: function(y) {
-                                if (typeof y !== "undefined") {
-                                    return "$" + y.toFixed(2) + "k";
-                                }
-                                return y;
-                            },
-                        },
-                        {
-                            formatter: function(y) {
-                                if (typeof y !== "undefined") {
-                                    return y.toFixed(0) + " Sales";
-                                }
-                                return y;
-                            },
-                        },
-                    ],
-                },
             };
+
             var chart = new ApexCharts(
                 document.querySelector("#contracts_charts"),
                 options
@@ -569,11 +523,15 @@
             chart.render();
         }
 
+
+
         // pipeline_by_manufacturer
 
         let graph_by_manufacturer_labels = {!! json_encode($graph_by_manufacturer['labels']) !!};
         let graph_by_manufacturer_data = {!! json_encode($graph_by_manufacturer['data']) !!};
         let revenue_by_manufacturer = {!! json_encode($graph_by_manufacturer['revenue']) !!};
+
+        console.log(graph_by_manufacturer_labels, graph_by_manufacturer_data, revenue_by_manufacturer);
         var chartBarColors = getChartColorsArray("pipeline_by_manufacturer");
         if (chartBarColors) {
             var options = {
@@ -593,22 +551,22 @@
                     enabled: false
                 },
                 series: [{
+                    name: 'Contracts',
                     data: graph_by_manufacturer_data
                 }],
-
                 colors: chartBarColors,
                 grid: {
                     borderColor: '#f1f1f1',
                 },
-                // title: {
-                //     text: 'Rating',
-                //     style: {
-                //         fontWeight: 500,
-                //     },
-                // },
+                title: {
+                    style: {
+                        fontWeight: 500,
+                    },
+                },
                 xaxis: {
                     categories: graph_by_manufacturer_labels,
                 },
+
                 fill: {
                     opacity: 1
 
@@ -617,6 +575,13 @@
                     position: 'top',
                     horizontalAlign: 'left',
                     offsetX: 40
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(value) {
+                            return parseInt(value);
+                        }
+                    }
                 },
                 colors: chartBarColors
 

@@ -299,43 +299,48 @@ class HomeController extends Controller {
 
 
 	public function calculateYearlyProfitRevenue() {
-		// Retrieve the contract data from the database
-		$user = Auth::user();
-		$qry = Contract::query();
-
-		$contracts = $qry->get();
-
-		// Initialize an array to store yearly profit/revenue
+		$contracts = Contract::all();
 		$yearlyData = [];
 
-		// Loop through each contract
 		foreach ( $contracts as $contract ) {
-			// Get the start date and end date of the contract
 			$startDate = Carbon::parse( $contract->start_date );
 			$endDate = Carbon::parse( $contract->end_date );
-
-			// Calculate the contract duration in years
 			$contractYears = $startDate->diffInYears( $endDate );
+			$dailyRevenue = $contract->contract_revenue / $startDate->diffInDays( $endDate );
 
-			// Loop through each year of the contract
 			for ( $i = 0; $i <= $contractYears; $i++ ) {
-				// Get the year for the current iteration
 				$currentYear = $startDate->copy()->addYears( $i )->format( 'Y' );
-
-				// Add the contract value to the corresponding year in the array
-				$yearlyData[ $currentYear ] = isset( $yearlyData[ $currentYear ] ) ? $yearlyData[ $currentYear ] + $contract->contract_revenue : $contract->contract_revenue;
+				$daysInYear = $startDate->copy()->addYears( $i )->isLeapYear() ? 366 : 365;
+				$yearlyRevenue = $dailyRevenue * $daysInYear;
+				$yearlyData[ $currentYear ]['revenue'] = isset( $yearlyData[ $currentYear ]['revenue'] ) ? $yearlyData[ $currentYear ]['revenue'] + $yearlyRevenue : $yearlyRevenue;
+				$yearlyData[ $currentYear ]['contracts'] = isset( $yearlyData[ $currentYear ]['contracts'] ) ? $yearlyData[ $currentYear ]['contracts'] + 1 : 1;
 			}
 		}
 
-		// Prepare the data for graph values and dates
-		$graphValues = array_values( $yearlyData );
+		ksort( $yearlyData );
+
+		// Format revenue values to two decimal places
+		$yearlyData = array_map( function ($value) {
+			return [ 
+				'revenue' => number_format( $value['revenue'], 2, '.', '' ),
+				'contracts' => $value['contracts']
+			];
+		}, $yearlyData );
+
+		$graphValues = array_column( $yearlyData, 'revenue' );
+		$graphContracts = array_column( $yearlyData, 'contracts' );
 		$graphDates = array_keys( $yearlyData );
 
 		return [ 
 			'graphValues' => $graphValues,
+			'graphContracts' => $graphContracts,
 			'graphDates' => $graphDates
 		];
 	}
+
+
+
+
 
 	// public function calculateDurationInMonths($contract)
 	// {
