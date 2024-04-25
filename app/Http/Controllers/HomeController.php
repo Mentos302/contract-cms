@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 class HomeController extends Controller {
-
-
 	/**
 	 * Show the application dashboard.
 	 *
@@ -36,37 +34,29 @@ class HomeController extends Controller {
 	public function index() {
 		$user = auth()->user();
 		$qry = Contract::query();
+
 		if ( $user->hasRole( 'customer' ) ) {
 			$qry->where( 'customer_id', $user->id );
 		}
-		$active_contracts = $this->getActiveContarcts();
-		$expiring_soon_contracts = $this->getExpiringSoonContracts();
-		$expired_contracts = $this->getExpiredContracts();
-		$not_renewing_contracts = $this->notRenewingContracts();
 
-		$profit_revenue = $this->calculateYearlyProfitRevenue();
-		$totalCustomer = 0;
-		if ( $user->hasRole( 'admin' ) ) {
-			$totalCustomer = User::role( 'customer' )->count();
-		}
+		$active_contracts = $this->getActiveContracts( $qry );
+		$expiring_soon_contracts = $this->getExpiringSoonContracts( $qry );
+		$expired_contracts = $this->getExpiredContracts( $qry );
+		$not_renewing_contracts = $this->notRenewingContracts( $qry );
+
+		$profit_revenue_monthly = $this->calculateProfitRevenueByTerm( "monthly" );
+		$profit_revenue_quarterly = $this->calculateProfitRevenueByTerm( "quarterly" );
+		$profit_revenue_annually = $this->calculateProfitRevenueByTerm( "annually" );
+
+		$totalCustomer = $user->hasRole( 'admin' ) ? User::role( 'customer' )->count() : 0;
+
 		$graph_by_manufacturer = $this->contractGraphByManufacturer();
-		$nearest_contarcts = $this->nearestContract();
-		list( $sumOpenContracts, $countOpenContracts ) = $this->openRevenue();
-		$open_revenue['sumOpenContracts'] = $sumOpenContracts;
-		$open_revenue['countOpenContracts'] = $countOpenContracts;
+		$nearest_contracts = $this->nearestContract();
 
-		list( $sumCloseWonContracts, $countCloseWonContracts ) = $this->closeWonRevenue();
-		$close_won_revenue['sumCloseWonContracts'] = $sumCloseWonContracts;
-		$close_won_revenue['countCloseWonContracts'] = $countCloseWonContracts;
-
-		list( $sumCloseLostContracts, $countCloseLostContracts ) = $this->closeLostRevenue();
-		$close_lost_revenue['sumCloseLostContracts'] = $sumCloseLostContracts;
-		$close_lost_revenue['countCloseLostContracts'] = $countCloseLostContracts;
-
-		list( $totalContractRevenue, $minContractRevenue, $renewalContractsCount ) = $this->revenueCount();
-		$revenue_and_count['totalContractRevenue'] = $totalContractRevenue;
-		$revenue_and_count['minContractRevenue'] = $minContractRevenue;
-		$revenue_and_count['renewalContractsCount'] = $renewalContractsCount;
+		$open_revenue = $this->getOpenRevenue();
+		$close_won_revenue = $this->getCloseWonRevenue();
+		$close_lost_revenue = $this->getCloseLostRevenue();
+		$revenue_and_count = $this->revenueCount( $qry );
 
 		return view( 'home', compact(
 			'graph_by_manufacturer',
@@ -75,82 +65,64 @@ class HomeController extends Controller {
 			'expired_contracts',
 			'not_renewing_contracts',
 			'totalCustomer',
-			'profit_revenue',
-			'nearest_contarcts',
+			'profit_revenue_monthly',
+			'profit_revenue_quarterly',
+			'profit_revenue_annually',
+			'nearest_contracts',
 			'open_revenue',
 			'close_won_revenue',
 			'close_lost_revenue',
-			'revenue_and_count',
+			'revenue_and_count'
 		) );
 	}
-	public function getActiveContarcts() {
-		$user = auth()->user();
-		$qry = Contract::query();
 
-		if ( $user->hasRole( 'customer' ) ) {
-			$qry->where( 'customer_id', $user->id );
-		}
-
+	public function getActiveContracts( $qry ) {
 		return $qry->where( 'start_date', '<=', now() )
-			->where( 'end_date', '>=', now() )->get();
+			->where( 'end_date', '>=', now() )
+			->get();
 	}
-	public function getExpiringSoonContracts() {
-		$user = auth()->user();
-		$qry = Contract::query();
-		if ( $user->hasRole( 'customer' ) ) {
-			$qry->where( 'customer_id', $user->id );
-		}
+
+	public function getExpiringSoonContracts( $qry ) {
 		return $qry->where( 'end_date', '>=', now() )
 			->where( 'end_date', '<=', now()->addDays( settings( 'expiration_days' ) ) )
 			->get();
 	}
-	public function getExpiredContracts() {
-		$user = auth()->user();
-		$qry = Contract::query();
-		if ( $user->hasRole( 'customer' ) ) {
-			$qry->where( 'customer_id', $user->id );
-		}
 
+	public function getExpiredContracts( $qry ) {
 		return $qry->where( 'end_date', '<', now() )
 			->get();
 	}
-	public function notRenewingContracts() {
-		$user = auth()->user();
-		$qry = Contract::query();
 
-		if ( $user->hasRole( 'customer' ) ) {
-			$qry->where( 'customer_id', $user->id );
-		}
-
-		return $qry
-			->where( function ($query) {
-				$query->whereHas( 'renewals', function ($q) {
-					$q->where( 'status', 'Close lost' );
-				} )->orWhere( function ($query) {
-					$query->doesntHave( 'renewals' )
-						->whereDate( 'end_date', '<', now()->subDays( 15 ) );
-				} );
-			} )
-
-			->get();
+	public function notRenewingContracts( $qry ) {
+		return $qry->where( function ($query) {
+			$query->whereHas( 'renewals', function ($q) {
+				$q->where( 'status', 'Close lost' );
+			} )->orWhere( function ($query) {
+				$query->doesntHave( 'renewals' )
+					->whereDate( 'end_date', '<', now()->subDays( 15 ) );
+			} );
+		} )->get();
 	}
+
 	public function contractsStatus( Request $request ) {
 		$contracts_status = [];
+
+		$qry = Contract::query()->where( 'contract_owner', 'Sivility Systems' );
+
 		if ( $request->status == 'active' ) {
-			$contracts_status = $this->getActiveContarcts();
+			$contracts_status = $this->getActiveContracts( $qry );
+		} elseif ( $request->status == 'expired' ) {
+			$contracts_status = $this->getExpiredContracts( $qry );
+		} elseif ( $request->status == 'expiring-soon' ) {
+			$contracts_status = $this->getExpiringSoonContracts( $qry );
 		}
-		if ( $request->status == 'expired' ) {
-			$contracts_status = $this->getExpiredContracts();
-		}
-		if ( $request->status == 'expiring-soon' ) {
-			$contracts_status = $this->getExpiringSoonContracts();
-		}
+
 		return view( 'admin.contract.contract-status', compact( 'contracts_status' ) );
 	}
 
-
 	public function contractGraphByManufacturer() {
 		$contractsByManufacturer = Contract::select( 'manufacturer_id', DB::raw( 'COUNT(*) as total, sum(contract_revenue) as revenue' ) )
+			->where( 'contract_owner', 'Sivility Systems' )
 			->groupBy( 'manufacturer_id' )
 			->get();
 
@@ -164,38 +136,59 @@ class HomeController extends Controller {
 			$data[] = $contract->total;
 			$revenue[] = (int) $contract->revenue;
 		}
+
 		return [ 
 			'labels' => $labels,
 			'data' => $data,
 			'revenue' => $revenue,
 		];
 	}
+
 	public function nearestContract() {
 		$currentDate = Carbon::now();
 		$selectedDaysFromNow = $currentDate->addDays( settings( 'expiration_days' ) );
 		$nearestContracts = Contract::where( 'end_date', '<=', $selectedDaysFromNow )
 			->orderBy( 'end_date' )
-			->get()
-			->take( 5 );
-		return $nearestContracts;
+			->take( 5 )
+			->get();
+
+		return $nearestContracts->count() ? $nearestContracts : [];
 	}
-	public function openRevenue() {
+
+	public function getOpenRevenue() {
 		$contractIds = Renewal::where( 'status', 'Open' )->pluck( 'contract_id' );
-		$closeLostContracts = Contract::whereIn( 'id', $contractIds )->get();
+		$openContracts = Contract::whereIn( 'id', $contractIds )->get();
 
-		$sumCloseLostRevenue = 0;
-		$countCloseLostContracts = 0;
+		$sumOpenRevenue = 0;
+		$countOpenContracts = 0;
 
-		foreach ( $closeLostContracts as $contract ) {
+		foreach ( $openContracts as $contract ) {
 			$revenue = $contract->contract_price - $contract->contract_cost;
-			$sumCloseLostRevenue += $revenue;
-			$countCloseLostContracts++;
+			$sumOpenRevenue += $revenue;
+			$countOpenContracts++;
 		}
 
-		return [ $sumCloseLostRevenue, $countCloseLostContracts ];
+		return [ 'sumOpenContracts' => $sumOpenRevenue, 'countOpenContracts' => $countOpenContracts ];
 	}
-	public function closeWonRevenue() {
+
+	public function getCloseWonRevenue() {
 		$contractIds = Renewal::where( 'status', 'Close won' )->pluck( 'contract_id' );
+		$closeWonContracts = Contract::whereIn( 'id', $contractIds )->get();
+
+		$sumCloseWonRevenue = 0;
+		$countCloseWonContracts = 0;
+
+		foreach ( $closeWonContracts as $contract ) {
+			$revenue = $contract->contract_price - $contract->contract_cost;
+			$sumCloseWonRevenue += $revenue;
+			$countCloseWonContracts++;
+		}
+
+		return [ 'sumCloseWonContracts' => $sumCloseWonRevenue, 'countCloseWonContracts' => $countCloseWonContracts ];
+	}
+
+	public function getCloseLostRevenue() {
+		$contractIds = Renewal::where( 'status', 'Close lost' )->pluck( 'contract_id' );
 		$closeLostContracts = Contract::whereIn( 'id', $contractIds )->get();
 
 		$sumCloseLostRevenue = 0;
@@ -207,152 +200,105 @@ class HomeController extends Controller {
 			$countCloseLostContracts++;
 		}
 
-		return [ $sumCloseLostRevenue, $countCloseLostContracts ];
-	}
-	public function closeLostRevenue() {
-		$contractIds = Renewal::where( 'status', 'Close lsot' )->pluck( 'contract_id' );
-		$closeLostContracts = Contract::whereIn( 'id', $contractIds )->get();
-
-		$sumCloseLostRevenue = 0;
-		$countCloseLostContracts = 0;
-
-		foreach ( $closeLostContracts as $contract ) {
-			$revenue = $contract->contract_price - $contract->contract_cost;
-			$sumCloseLostRevenue += $revenue;
-			$countCloseLostContracts++;
-		}
-
-		return [ $sumCloseLostRevenue, $countCloseLostContracts ];
+		return [ 'sumCloseLostContracts' => $sumCloseLostRevenue, 'countCloseLostContracts' => $countCloseLostContracts ];
 	}
 
+	public function revenueCount( $qry ) {
+		$totalContractRevenue = $qry->sum( 'contract_revenue' );
+		$minContractRevenue = $qry->min( 'contract_revenue' );
+		$renewalContractsCount = $qry->where( 'end_date', '>', Carbon::now() )->count();
 
-
-	public function revenueCount() {
-		$currentDate = Carbon::now();
-
-		$totalContractRevenue = Contract::sum( 'contract_revenue' );
-		$minContractRevenue = Contract::min( 'contract_revenue' );
-		$renewalContractsCount = Contract::where( 'end_date', '>', $currentDate )->count();
 		return [ $totalContractRevenue, $minContractRevenue, $renewalContractsCount ];
 	}
 
-	// Add functions to calculate monthly, quarterly, and annual costs and profit margins
-
-	// Function to calculate monthly cost
-	// private function calculateMonthlyCost($contract)
-	// {
-	//     $totalValue = $contract->value;
-	//     $durationInMonths = $this->calculateDurationInMonths($contract);
-
-	//     $monthlyCost = $totalValue / $durationInMonths;
-
-	//     return round($monthlyCost, 2);
-	// }
-
-	// Function to calculate quarterly cost
-	private function calculateQuarterlyCost( $contract ) {
-		$totalValue = $contract->contract_price;
-		$durationInMonths = $this->calculateDurationInMonths( $contract );
-		// Calculate the quarterly cost
-		$quarterlyCost = ( $totalValue / $durationInMonths ) * 3;
-
-		return round( $quarterlyCost, 2 );
-	}
-
-	// Function to calculate annual cost
-	// private function calculateAnnualCost($contract)
-	// {
-	//     $totalValue = $contract->value;
-	//     $durationInMonths = $this->calculateDurationInMonths($contract);
-
-	//     // Calculate the annual cost
-	//     $annualCost = ($totalValue / $durationInMonths) * 12;
-
-	//     return round($annualCost, 2);
-	// }
-
-	// Function to calculate profit margin
-	// private function calculateProfitMargin($contract)
-	// {
-	//     $totalValue = $contract->value;
-	//     $totalCosts = $this->calculateTotalCosts($contract);
-	//     // Calculate the profit
-	//     $profit = $totalValue - $totalCosts;
-
-	//     // Calculate the profit margin as a percentage
-	//     $profitMargin = ($profit / $totalValue) * 100;
-
-	//     return $profitMargin;
-	// }
-
-	// public function calculateTotalCosts($contract){
-	//     $materialCosts = $contract->material_costs;
-	//     $laborCosts = $contract->labor_costs;
-	//     $overheadCosts = $contract->overhead_costs;
-	//     // Calculate the total costs by summing up all the costs
-	//     $totalCosts = $materialCosts + $laborCosts + $overheadCosts;
-
-	//     return $totalCosts;
-	// }
-
-	// helpers
 
 
-	public function calculateYearlyProfitRevenue() {
-		$contracts = Contract::all();
-		$yearlyData = [];
+	public function calculateProfitRevenueByTerm( $term ) {
+		$contracts = Contract::where( 'contract_owner', 'Sivility Systems' )->get();
+
+		$data = [];
 
 		foreach ( $contracts as $contract ) {
 			$startDate = Carbon::parse( $contract->start_date );
 			$endDate = Carbon::parse( $contract->end_date );
 			$contractYears = $startDate->diffInYears( $endDate );
-			$totalRevenue = $contract->contract_revenue;
+			$totalRevenue = $contract->contract_price;
+			$totalCost = $contract->contract_cost;
 			$dailyRevenue = $totalRevenue / $startDate->diffInDays( $endDate );
+			$dailyCost = $totalCost / $startDate->diffInDays( $endDate );
 
-			for ( $i = 0; $i <= $contractYears; $i++ ) {
-				$currentYear = $startDate->copy()->addYears( $i )->format( 'Y' );
-				$daysInYear = $startDate->copy()->addYears( $i )->isLeapYear() ? 366 : 365;
-				$yearlyRevenue = $dailyRevenue * $daysInYear;
-				$yearlyProfit = $yearlyRevenue;
-				$yearlyData[ $currentYear ]['revenue'] = isset( $yearlyData[ $currentYear ]['revenue'] ) ? $yearlyData[ $currentYear ]['revenue'] + $yearlyRevenue : $yearlyRevenue;
-				$yearlyData[ $currentYear ]['profit'] = isset( $yearlyData[ $currentYear ]['profit'] ) ? $yearlyData[ $currentYear ]['profit'] + $yearlyProfit : $yearlyProfit;
+			if ( $term === 'annually' ) {
+				for ( $i = 0; $i <= $contractYears; $i++ ) {
+					$currentYear = $startDate->copy()->addYears( $i )->format( 'Y' );
+					$daysInYear = $startDate->copy()->addYears( $i )->isLeapYear() ? 366 : 365;
+					$yearlyRevenue = $dailyRevenue * $daysInYear;
+					$yearlyCost = $dailyCost * $daysInYear;
+					$yearlyProfit = $yearlyRevenue - $yearlyCost;
+
+					if ( ! isset( $data[ $currentYear ] ) ) {
+						$data[ $currentYear ] = [ 'revenue' => 0, 'profit' => 0 ];
+					}
+
+					$data[ $currentYear ]['revenue'] += $yearlyRevenue;
+					$data[ $currentYear ]['profit'] += $yearlyProfit;
+				}
+			} elseif ( $term === 'quarterly' ) {
+				for ( $i = 0; $i <= $contractYears; $i++ ) {
+					$currentYear = $startDate->copy()->addYears( $i )->format( 'Y' );
+
+					for ( $j = 1; $j <= 4; $j++ ) {
+						$startMonth = ( $j - 1 ) * 3 + 1;
+						$endMonth = $startMonth + 2;
+						$startQuarter = $startDate->copy()->addYears( $i )->month( $startMonth );
+						$endQuarter = $startDate->copy()->addYears( $i )->month( $endMonth )->endOfMonth();
+						$daysInQuarter = $startQuarter->diffInDays( $endQuarter ) + 1; // Add 1 to include the end date
+						$quarterlyRevenue = $dailyRevenue * $daysInQuarter;
+						$quarterlyCost = $dailyCost * $daysInQuarter;
+						$quarterlyProfit = $quarterlyRevenue - $quarterlyCost;
+
+						if ( ! isset( $data[ $currentYear . '-Q' . $j ] ) ) {
+							$data[ $currentYear . '-Q' . $j ] = [ 'revenue' => 0, 'profit' => 0 ];
+						}
+
+						$data[ $currentYear . '-Q' . $j ]['revenue'] += $quarterlyRevenue;
+						$data[ $currentYear . '-Q' . $j ]['profit'] += $quarterlyProfit;
+					}
+				}
+			} elseif ( $term === 'monthly' ) {
+				for ( $i = 0; $i <= $contractYears; $i++ ) {
+					$currentYear = $startDate->copy()->addYears( $i )->format( 'Y' );
+
+					for ( $j = 1; $j <= 12; $j++ ) {
+						$daysInMonth = $startDate->copy()->addYears( $i )->month( $j )->daysInMonth;
+						$monthlyRevenue = $dailyRevenue * $daysInMonth;
+						$monthlyCost = $dailyCost * $daysInMonth;
+						$monthlyProfit = $monthlyRevenue - $monthlyCost;
+
+						if ( ! isset( $data[ $currentYear . '-' . str_pad( $j, 2, '0', STR_PAD_LEFT ) ] ) ) {
+							$data[ $currentYear . '-' . str_pad( $j, 2, '0', STR_PAD_LEFT ) ] = [ 'revenue' => 0, 'profit' => 0 ];
+						}
+
+						$data[ $currentYear . '-' . str_pad( $j, 2, '0', STR_PAD_LEFT ) ]['revenue'] += $monthlyRevenue;
+						$data[ $currentYear . '-' . str_pad( $j, 2, '0', STR_PAD_LEFT ) ]['profit'] += $monthlyProfit;
+					}
+				}
 			}
 		}
 
-		ksort( $yearlyData );
+		$formattedData = [];
 
-		$yearlyData = array_map( function ($value) {
-			return [ 
-				'revenue' => number_format( $value['revenue'], 2, '.', '' ),
-				'profit' => number_format( $value['profit'], 2, '.', '' )
+		foreach ( $data as $year => $values ) {
+			$formattedData[ $year ] = [ 
+				'revenue' => number_format( $values['revenue'], 2, '.', '' ),
+				'profit' => number_format( $values['profit'], 2, '.', '' ),
 			];
-		}, $yearlyData );
+		}
 
-		$graphValuesRevenue = array_column( $yearlyData, 'revenue' );
-		$graphValuesProfit = array_column( $yearlyData, 'profit' );
-		$graphDates = array_keys( $yearlyData );
-
-		return [ 
-			'graphValuesRevenue' => $graphValuesRevenue,
-			'graphValuesProfit' => $graphValuesProfit,
-			'graphDates' => $graphDates
-		];
+		return $formattedData;
 	}
 
 
 
 
-
-
-	// public function calculateDurationInMonths($contract)
-	// {
-	//     $startDate = Carbon::parse($contract->start_date);
-	//     $endDate = Carbon::parse($contract->end_date);
-	//     if ($contract->renewal_date) {
-	//         $endDate = Carbon::parse($contract->renewal_date);
-	//     }
-	//     $durationInMonths = $startDate->diffInMonths($endDate);
-
-	//     return $durationInMonths;
-	// }
 }
+

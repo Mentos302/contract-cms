@@ -364,7 +364,7 @@
                         @endif
                     </div>
                     <div class="row">
-                        @if (count($nearest_contarcts))
+                        @if (isset($nearest_contarcts) && count($nearest_contarcts))
                             <div class="col-xl-4">
                                 <div class="card">
                                     <div class="card-header">
@@ -395,13 +395,17 @@
                                 </div>
                             </div>
                         @endif
-                        @if ($profit_revenue['graphValues'])
+                        @if (!empty($profit_revenue_monthly))
                             <div class="col-xl-8">
                                 <div class="card">
                                     <div class="card-header border-0 align-items-center d-flex">
-                                        <h4 class="card-title mb-0 flex-grow-1">Revenue</h4>
+                                        <h4 class="card-title mb-0 flex-grow-1">Revenue & Profit</h4>
+                                        <div class="revenue-profit_buttons">
+                                            <button class="active" onclick="updateChart('monthly', this)">Monthly</button>
+                                            <button onclick="updateChart('quarterly', this)">Quarterly</button>
+                                            <button onclick="updateChart('annually', this)">Annually</button>
+                                        </div>
                                     </div>
-
                                     <div class="card-body p-0 pb-2">
                                         <div class="w-100">
                                             <div id="contracts_charts"
@@ -431,24 +435,31 @@
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
 
     <script>
-        let graphDates = {!! json_encode($profit_revenue['graphDates']) !!};
-        let graphValues = {!! json_encode($profit_revenue['graphValues']) !!};
-        let graphContracts = {!! json_encode($profit_revenue['graphContracts']) !!};
+        let monthlyProfitRevenueData = {!! json_encode($profit_revenue_monthly) !!};
+        let quarterlyProfitRevenueData = {!! json_encode($profit_revenue_quarterly) !!};
+        let annuallyProfitRevenueData = {!! json_encode($profit_revenue_annually) !!};
 
-        console.log(graphDates, graphValues, graphContracts);
+        let graphDates = Object.keys(monthlyProfitRevenueData);
+        let graphValuesRevenue = graphDates.map(date => monthlyProfitRevenueData[date]['revenue']);
+        let graphValuesProfit = graphDates.map(date => monthlyProfitRevenueData[date]['profit']);
+
+
         var linechartcustomerColors = getChartColorsArray("contracts_charts");
+
+        let revenueProfitChart;
+
         if (linechartcustomerColors) {
             var options = {
                 series: [{
                         name: "Revenue",
                         type: "area",
-                        data: graphValues,
+                        data: graphValuesRevenue,
                     },
                     {
-                        name: "Contracts",
-                        type: "line",
-                        data: graphContracts,
-                    },
+                        name: "Profit",
+                        type: "area",
+                        data: graphValuesProfit,
+                    }
                 ],
                 chart: {
                     height: 600,
@@ -462,38 +473,26 @@
                     width: [2, 2],
                 },
                 fill: {
-                    opacity: [0.1, 1],
+                    type: "solid",
+                    opacity: 0.1,
+                    colors: [linechartcustomerColors[0], linechartcustomerColors[2]],
                 },
                 markers: {
-                    size: [0, 4],
+                    size: 0,
                 },
                 xaxis: {
                     categories: graphDates,
                 },
-                yaxis: [{
-                        title: {
-                            text: "Revenue (USD)",
-                        },
-                        labels: {
-                            formatter: function(val) {
-                                return "$" + val.toFixed(2);
-                            },
+                yaxis: {
+                    title: {
+                        text: "Amount (USD)",
+                    },
+                    labels: {
+                        formatter: function(val) {
+                            return "$" + val.toFixed(2);
                         },
                     },
-                    {
-                        opposite: true,
-                        title: {
-                            text: "Contracts",
-                        },
-                        labels: {
-                            formatter: function(val) {
-                                return Math.round(val);
-                            },
-                        },
-
-                        max: Math.max(...graphContracts) * 1.1,
-                    },
-                ],
+                },
                 grid: {
                     borderColor: "#f1f1f1",
                 },
@@ -505,13 +504,48 @@
                 colors: linechartcustomerColors,
             };
 
-            var chart = new ApexCharts(
+            revenueProfitChart = new ApexCharts(
                 document.querySelector("#contracts_charts"),
                 options
             );
-            chart.render();
+
+            revenueProfitChart.render();
         }
 
+        function updateChart(term, button) {
+            let data;
+            if (term === 'monthly') {
+                data = monthlyProfitRevenueData;
+            } else if (term === 'quarterly') {
+                data = quarterlyProfitRevenueData;
+            } else if (term === 'annually') {
+                data = annuallyProfitRevenueData;
+            }
+
+            let graphDates = Object.keys(data);
+            let graphValuesRevenue = graphDates.map(date => data[date]['revenue']);
+            let graphValuesProfit = graphDates.map(date => data[date]['profit']);
+
+            revenueProfitChart.updateOptions({
+                xaxis: {
+                    categories: graphDates,
+                }
+            });
+
+            revenueProfitChart.updateSeries([{
+                name: "Revenue",
+                data: graphValuesRevenue,
+            }, {
+                name: "Profit",
+                data: graphValuesProfit,
+            }]);
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.revenue-profit_buttons button').forEach(btn => btn.classList.remove('active'));
+
+            // Add active class to the clicked button
+            button.classList.add('active');
+        }
 
 
         // pipeline_by_manufacturer
@@ -520,7 +554,6 @@
         let graph_by_manufacturer_data = {!! json_encode($graph_by_manufacturer['data']) !!};
         let revenue_by_manufacturer = {!! json_encode($graph_by_manufacturer['revenue']) !!};
 
-        console.log(graph_by_manufacturer_labels, graph_by_manufacturer_data, revenue_by_manufacturer);
         var chartBarColors = getChartColorsArray("pipeline_by_manufacturer");
         if (chartBarColors) {
             var options = {

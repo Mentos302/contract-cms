@@ -82,3 +82,17 @@ File: Custom Css File
     bottom: 0;
     right: 0;
 }
+
+.revenue-profit_buttons {
+    display: flex;
+    gap: 8px;
+    button {
+        background: none;
+        border: none;
+        color: #204791;
+        &.active {
+            text-decoration: underline;
+            font-weight: 600;
+        }
+    }
+}
