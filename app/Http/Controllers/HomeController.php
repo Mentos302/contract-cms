@@ -60,6 +60,8 @@ class HomeController extends Controller {
 
 		$owners_revenue = $this->compareOwnersRevenue();
 
+		$monthly_target = $this->calculateProfitRevenueByMonth();
+
 		return view( 'home', compact(
 			'graph_by_manufacturer',
 			'active_contracts',
@@ -75,7 +77,8 @@ class HomeController extends Controller {
 			'close_won_revenue',
 			'close_lost_revenue',
 			'revenue_and_count',
-			'owners_revenue'
+			'owners_revenue',
+			'monthly_target'
 		) );
 	}
 
@@ -306,6 +309,31 @@ class HomeController extends Controller {
 		$difference = $allContractsRevenue - $sivilityContractsRevenue;
 
 		return [ 'allContractsRevenue' => $allContractsRevenue, 'sivilityContractsRevenue' => $sivilityContractsRevenue, 'difference' => $difference ];
+	}
+
+	public function calculateProfitRevenueByMonth() {
+		$startDate = Carbon::now()->startOfMonth();
+		$endDate = Carbon::now()->endOfMonth();
+
+		$renewals = Renewal::where( 'status', 'Close Won' )
+			->whereBetween( 'updated_at', [ $startDate, $endDate ] )
+			->get();
+
+		$totalRevenue = 0;
+		$totalCost = 0;
+
+		foreach ( $renewals as $renewal ) {
+			$contract = $renewal->contract;
+			$totalRevenue += $contract->contract_price;
+			$totalCost += $contract->contract_cost;
+		}
+
+		$profit = $totalRevenue - $totalCost;
+
+		return [ 
+			'totalRevenue' => $totalRevenue,
+			'profit' => $profit
+		];
 	}
 
 }

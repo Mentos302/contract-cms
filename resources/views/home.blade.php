@@ -166,71 +166,49 @@
                         <div class="col-xl-4">
                             <div class="card">
                                 <div class="card-body targets">
-                                    <div class="target-title">
-                                        <h5>Target values:</h5>
-                                        <ul class="nav nav-pills nav-success mb-3 justify-content-around" role="tablist">
-                                            <div class="btn-group mt-2 shadow" role="group" aria-label="Basic example">
-                                                <li class="nav-item" role="presentation">
-                                                    <a class=" nav-link waves-effect waves-light active "
-                                                        data-bs-toggle="tab" href="#revenue" role="tab"
-                                                        aria-selected="true">Revenue</a>
-                                                </li>
-                                                <li class="nav-item" role="presentation">
-                                                    <a class="nav-link waves-effect waves-light " data-bs-toggle="tab"
-                                                        href="#count" role="tab" aria-selected="false"
-                                                        tabindex="-1">Count</a>
-                                                </li>
-                                            </div>
-                                        </ul>
+                                    <div class="target-title mb-3">
+                                        <h5>Target profit & revenue:</h5>
                                     </div>
                                     <div class="tab-content text-muted">
                                         <div class="tab-pane active show" id="revenue" role="tabpanel">
-                                            <div class="row">
-                                                <div class="col-6">
-                                                    <label for="labelInputFrom" class="form-label">From $</label>
-                                                    <input readonly type="number" {{-- value="{{ $revenue_and_count['minContractRevenue'] }}" --}} value="100"
-                                                        class="form-control" id="labelInputFrom">
-
-                                                </div>
-                                                <div class="col-6">
-                                                    <label for="labelInputTo" class="form-label">To $</label>
-                                                    <input readonly type="number" {{-- value="{{ $revenue_and_count['totalContractRevenue'] }}" --}} value="1200"
-                                                        class="form-control" id="labelInputTo">
-                                                </div>
-
+                                            <div class="row mb-3">
                                                 <div class="col-md-12">
+                                                    <h6>{{ date('F') }}'s Renewal Profit:
+                                                        ${{ number_format($monthly_target['profit'], 2) }} /
+                                                        ${{ number_format(2000, 2) }}</h6>
                                                     <div class="progress bg-primary-subtle mt-2">
-                                                        <div class="progress-bar" role="progressbar" style="width: 43%;"
-                                                            aria-valuenow="" aria-valuemin="0" aria-valuemax="100">
-
-                                                            <div>12%</div>
+                                                        <div class="progress-bar" role="progressbar"
+                                                            style="width: {{ $monthly_target['profit'] > 0 ? $monthly_target['profit'] / 20 : 0 }}%;"
+                                                            aria-valuenow="{{ $monthly_target['profit'] > 0 ? $monthly_target['profit'] / 20 : 0 }}"
+                                                            aria-valuemin="0" aria-valuemax="100">
+                                                            <div>
+                                                                ${{ number_format(2000 - $monthly_target['profit'], 2) }}
+                                                                is left,
+                                                                {{ $monthly_target['profit'] > 0 ? round($monthly_target['profit'] / 20, 2) : 0 }}%
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <div class="tab-pane show" id="count" role="tabpanel">
                                             <div class="row">
-                                                <div class="col-6">
-                                                    <label for="labelInputFrom" class="form-label">From</label>
-                                                    <input readonly type="number" {{-- value="{{ $revenue_and_count['minContractRevenue'] }}" --}} value="50"
-                                                        class="form-control" id="labelInputFrom">
-
-                                                </div>
-                                                <div class="col-6">
-                                                    <label for="labelInputTo" class="form-label">To</label>
-                                                    <input readonly type="number" {{-- value="{{ $revenue_and_count['totalContractRevenue'] }}" --}} value="610"
-                                                        class="form-control" id="labelInputTo">
-                                                </div>
-
                                                 <div class="col-md-12">
+                                                    <h6>{{ date('F') }}'s Renewal Revenue:
+                                                        ${{ number_format($monthly_target['totalRevenue'], 2) }}
+                                                        /
+                                                        ${{ number_format(15000, 2) }}
+                                                    </h6>
                                                     <div class="progress bg-primary-subtle mt-2">
-                                                        <div class="progress-bar" role="progressbar" style="width: 12%;"
-                                                            aria-valuenow="" aria-valuemin="0" aria-valuemax="100">
-                                                            <div>12%</div>
-                                                        </div>
+                                                        <div class="progress-bar" role="progressbar"
+                                                            style="width: {{ $monthly_target['totalRevenue'] > 0 ? $monthly_target['totalRevenue'] / 150 : 0 }}%;"
+                                                            aria-valuenow="{{ $monthly_target['totalRevenue'] > 0 ? $monthly_target['totalRevenue'] / 150 : 0 }}"
+                                                            aria-valuemin="0" aria-valuemax="100">
 
+                                                            <div>
+                                                                ${{ number_format(15000 - $monthly_target['totalRevenue'], 2) }}
+                                                                is left,
+                                                                {{ $monthly_target['totalRevenue'] > 0 ? round($monthly_target['totalRevenue'] / 150, 2) : 0 }}%
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -461,7 +439,7 @@
                 width: 380,
                 type: 'donut',
             },
-            series: [contractComparisonData.sivilityContractsRevenue, contractComparisonData.difference, ],
+            series: [contractComparisonData.sivilityContractsRevenue, contractComparisonData.difference],
             labels: ['Sivility Contracts', 'Other Vendor Revenue'],
             colors: ['#204791', '#f46a6a'],
             responsive: [{
@@ -490,6 +468,7 @@
                     enabled: false,
                 },
             },
+
         }
 
         var contractComparisonChart = new ApexCharts(document.querySelector("#contracts_owners_chart"),
