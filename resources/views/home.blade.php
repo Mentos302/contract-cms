@@ -108,7 +108,6 @@
                                             <thead class="table-light">
                                                 <tr class="text-muted">
                                                     <th scope="col" style="width: 20%;">Contract</th>
-                                                    <th scope="col" style="width: 40%;">Progress</th>
                                                     <th scope="col">Time Elapsed</th>
                                                 </tr>
                                             </thead>
@@ -117,21 +116,11 @@
                                                     <tr>
                                                         <td class="customer-contract-success">
                                                             <div class="fs-19">{{ $item->manufacturer->name }}
-                                                                #{{ $item->number }}</div>
+                                                                #{{ $item->mfr_contract_number }}</div>
                                                             <div class="d-flex py-4">
-                                                                <div>{{ $item->start_date }}</div>
+                                                                <div>{{ formatDate($item->start_date) }}</div>
                                                                 <i class="px-2 ri-arrow-right-line "></i>
-                                                                <div>{{ $item->end_date }}</div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="customer-contract-progress progress">
-                                                                <div class="progress-bar" role="progressbar"
-                                                                    style="width: {{ $item->contract_progress }}%;"
-                                                                    aria-valuenow="{{ $item->contract_progress }}"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                    {{ $item->contract_progress }}%
-                                                                </div>
+                                                                <div>{{ formatDate($item->end_date) }}</div>
                                                             </div>
                                                         </td>
                                                         <td>

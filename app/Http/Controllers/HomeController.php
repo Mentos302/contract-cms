@@ -306,37 +306,39 @@ class HomeController extends Controller {
 			$startDate = Carbon::parse( $contract->start_date );
 			$endDate = Carbon::parse( $contract->end_date );
 			$contractYears = $startDate->diffInYears( $endDate );
-			$dailyRevenue = $contract->contract_revenue / $startDate->diffInDays( $endDate );
+			$totalRevenue = $contract->contract_revenue;
+			$dailyRevenue = $totalRevenue / $startDate->diffInDays( $endDate );
 
 			for ( $i = 0; $i <= $contractYears; $i++ ) {
 				$currentYear = $startDate->copy()->addYears( $i )->format( 'Y' );
 				$daysInYear = $startDate->copy()->addYears( $i )->isLeapYear() ? 366 : 365;
 				$yearlyRevenue = $dailyRevenue * $daysInYear;
+				$yearlyProfit = $yearlyRevenue;
 				$yearlyData[ $currentYear ]['revenue'] = isset( $yearlyData[ $currentYear ]['revenue'] ) ? $yearlyData[ $currentYear ]['revenue'] + $yearlyRevenue : $yearlyRevenue;
-				$yearlyData[ $currentYear ]['contracts'] = isset( $yearlyData[ $currentYear ]['contracts'] ) ? $yearlyData[ $currentYear ]['contracts'] + 1 : 1;
+				$yearlyData[ $currentYear ]['profit'] = isset( $yearlyData[ $currentYear ]['profit'] ) ? $yearlyData[ $currentYear ]['profit'] + $yearlyProfit : $yearlyProfit;
 			}
 		}
 
 		ksort( $yearlyData );
 
-		// Format revenue values to two decimal places
 		$yearlyData = array_map( function ($value) {
 			return [ 
 				'revenue' => number_format( $value['revenue'], 2, '.', '' ),
-				'contracts' => $value['contracts']
+				'profit' => number_format( $value['profit'], 2, '.', '' )
 			];
 		}, $yearlyData );
 
-		$graphValues = array_column( $yearlyData, 'revenue' );
-		$graphContracts = array_column( $yearlyData, 'contracts' );
+		$graphValuesRevenue = array_column( $yearlyData, 'revenue' );
+		$graphValuesProfit = array_column( $yearlyData, 'profit' );
 		$graphDates = array_keys( $yearlyData );
 
 		return [ 
-			'graphValues' => $graphValues,
-			'graphContracts' => $graphContracts,
+			'graphValuesRevenue' => $graphValuesRevenue,
+			'graphValuesProfit' => $graphValuesProfit,
 			'graphDates' => $graphDates
 		];
 	}
+
 
 
 
