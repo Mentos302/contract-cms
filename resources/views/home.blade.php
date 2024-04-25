@@ -364,6 +364,46 @@
                         @endif
                     </div>
                     <div class="row">
+
+                        @if (!empty($profit_revenue_monthly))
+                            <div class="col-xl-8">
+                                <div class="card">
+                                    <div class="card-header border-0 align-items-center d-flex">
+                                        <h4 class="card-title mb-0 flex-grow-1">Revenue & Profit</h4>
+                                        <div class="revenue-profit_buttons">
+                                            <button class="active" onclick="updateChart('monthly', this)">Monthly</button>
+                                            <button onclick="updateChart('quarterly', this)">Quarterly</button>
+                                            <button onclick="updateChart('annually', this)">Annually</button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0 pb-2">
+                                        <div class="w-100">
+                                            <div id="contracts_charts"
+                                                data-colors='["--vz-success", "--vz-primary", "--vz-danger"]'
+                                                class="apex-charts" dir="ltr"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($owners_revenue)
+                            <div class="col-xl-4">
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h4 class="card-title mb-0">Contracts Revenue</h4>
+                                    </div><!-- end card header -->
+
+                                    <div class="card-body">
+                                        <div id="contracts_owners_chart"
+                                            data-colors='["--vz-primary", "--vz-success", "--vz-warning", "--vz-danger", "--vz-info"]'
+                                            class="apex-charts" dir="ltr"></div>
+                                    </div><!-- end card-body -->
+                                </div><!-- end card -->
+                            </div>
+                        @endif
+                    </div>
+                    <div class="row">
                         @if (isset($nearest_contarcts) && count($nearest_contarcts))
                             <div class="col-xl-4">
                                 <div class="card">
@@ -395,27 +435,6 @@
                                 </div>
                             </div>
                         @endif
-                        @if (!empty($profit_revenue_monthly))
-                            <div class="col-xl-8">
-                                <div class="card">
-                                    <div class="card-header border-0 align-items-center d-flex">
-                                        <h4 class="card-title mb-0 flex-grow-1">Revenue & Profit</h4>
-                                        <div class="revenue-profit_buttons">
-                                            <button class="active" onclick="updateChart('monthly', this)">Monthly</button>
-                                            <button onclick="updateChart('quarterly', this)">Quarterly</button>
-                                            <button onclick="updateChart('annually', this)">Annually</button>
-                                        </div>
-                                    </div>
-                                    <div class="card-body p-0 pb-2">
-                                        <div class="w-100">
-                                            <div id="contracts_charts"
-                                                data-colors='["--vz-success", "--vz-primary", "--vz-danger"]'
-                                                class="apex-charts" dir="ltr"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
                     </div>
                 @endif
 
@@ -433,6 +452,51 @@
     <!-- dashboard init -->
     <script src="{{ URL::asset('build/js/pages/dashboard-ecommerce.init.js') }}"></script>
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
+
+    <script>
+        let contractComparisonData = {!! json_encode($owners_revenue) !!};
+
+        var contractComparisonDataOptions = {
+            chart: {
+                width: 380,
+                type: 'donut',
+            },
+            series: [contractComparisonData.sivilityContractsRevenue, contractComparisonData.difference, ],
+            labels: ['Sivility Contracts', 'Other Vendor Revenue'],
+            colors: ['#204791', '#f46a6a'],
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 300
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }],
+            chart: {
+                height: 333,
+                type: "donut",
+            },
+            legend: {
+                position: "bottom",
+            },
+            stroke: {
+                show: false
+            },
+            dataLabels: {
+                dropShadow: {
+                    enabled: false,
+                },
+            },
+        }
+
+        var contractComparisonChart = new ApexCharts(document.querySelector("#contracts_owners_chart"),
+            contractComparisonDataOptions);
+
+        contractComparisonChart.render();
+    </script>
 
     <script>
         let monthlyProfitRevenueData = {!! json_encode($profit_revenue_monthly) !!};

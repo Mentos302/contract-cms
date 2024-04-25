@@ -58,6 +58,8 @@ class HomeController extends Controller {
 		$close_lost_revenue = $this->getCloseLostRevenue();
 		$revenue_and_count = $this->revenueCount( $qry );
 
+		$owners_revenue = $this->compareOwnersRevenue();
+
 		return view( 'home', compact(
 			'graph_by_manufacturer',
 			'active_contracts',
@@ -72,7 +74,8 @@ class HomeController extends Controller {
 			'open_revenue',
 			'close_won_revenue',
 			'close_lost_revenue',
-			'revenue_and_count'
+			'revenue_and_count',
+			'owners_revenue'
 		) );
 	}
 
@@ -297,8 +300,13 @@ class HomeController extends Controller {
 		return $formattedData;
 	}
 
+	public function compareOwnersRevenue() {
+		$allContractsRevenue = Contract::sum( 'contract_price' );
+		$sivilityContractsRevenue = Contract::where( 'contract_owner', 'Sivility Systems' )->sum( 'contract_price' );
+		$difference = $allContractsRevenue - $sivilityContractsRevenue;
 
-
+		return [ 'allContractsRevenue' => $allContractsRevenue, 'sivilityContractsRevenue' => $sivilityContractsRevenue, 'difference' => $difference ];
+	}
 
 }
 
