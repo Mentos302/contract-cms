@@ -41,10 +41,12 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 		Route::resource( 'term', App\Http\Controllers\Admin\TermController::class);
 		Route::resource( 'customer', App\Http\Controllers\Admin\CustomerController::class);
 		Route::resource( 'renewal', App\Http\Controllers\Admin\RenewalController::class);
+
 	} );
 
 	Route::group( [ 'middleware' => [ 'role:admin|customer' ] ], function () {
 		Route::resource( 'contract', App\Http\Controllers\Admin\ContractController::class);
+
 		Route::post( '/', [ App\Http\Controllers\Admin\SettingController::class, 'store' ] )->name( 'setting.store' );
 
 		Route::get( 'contracts-status', [ App\Http\Controllers\HomeController::class, 'contractsStatus' ] )->name( 'contracts.status' );
@@ -55,6 +57,8 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 			Route::get( 'lost-contracts', [ App\Http\Controllers\Admin\ReportController::class, 'lostContracts' ] )->name( 'lost.contracts' );
 			Route::get( 'total-contract-base-value', [ App\Http\Controllers\Admin\ReportController::class, 'totalContractBaseValue' ] )->name( 'total.contract.base.value' );
 		} );
+
+		Route::post( '/renewal/store', [ App\Http\Controllers\Admin\RenewalController::class, 'storeCustomerRenewal' ] )->name( 'renewal.store.customer' );
 
 	} );
 

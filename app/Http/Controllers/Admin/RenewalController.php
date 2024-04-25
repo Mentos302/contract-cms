@@ -98,5 +98,21 @@ class RenewalController extends Controller {
 
 		return redirect()->route( 'renewal.index' )->with( 'delete', 'Contract deleted Successfully.' );
 	}
+	public function storeCustomerRenewal( RenewalCreateRequest $request ) {
+		$requestData = $request->validated();
+
+		$contractId = $requestData['contract_id'];
+
+		$contract = Contract::findOrFail( $contractId );
+
+		if ( $contract->customer_id === Auth::id() ) {
+			Renewal::create( $requestData );
+
+			return response()->json( "Renewal Quoted!" . Auth::id(), 200 );
+		} else {
+			return response()->json( "You are not authorized to create a renewal for this contract", 403 );
+		}
+	}
+
 
 }

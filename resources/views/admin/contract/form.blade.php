@@ -42,7 +42,7 @@
                                 </select>
                             </div>
                         @else
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-3 mb-3" style="display: none;">
                                 <label class="form-label">Customer</label>
                                 <input type="text" readonly class="form-control" value="{{ Auth::user()->id }}" />
                                 <input type="hidden" name="customer_id" value="{{ Auth::user()->id }}" />
