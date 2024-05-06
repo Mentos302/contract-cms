@@ -14,7 +14,7 @@
     <div class="col-md-12">
         <form
             action="{{ isset($customer) && $customer->id ? route('customer.update', $customer->id) : route('customer.store') }}"
-            method="POST">
+            method="POST" autocomplete="off">
             @if (isset($customer))
                 @method('PUT')
             @endif
@@ -35,16 +35,16 @@
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" autocomplete="off" name="email"
                                 placeholder="Enter customer email"
-                                value="{{ isset($customer) ? $customer->email : old('email') }}" />
+                                value="{{ isset($customer) ? $customer->email : old('email') }}" autocomplete="off" />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" class="form-control" autocomplete="off" name="password"
+                            <input type="password" class="form-control" autocomplete="new-password" name="new-password"
                                 placeholder="Enter password" />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" autocomplete="off" name="password_confirmation"
+                            <input type="password" class="form-control" autocomplete="false" name="password_confirmation"
                                 placeholder="Confirm password" />
                         </div>
                     </div>
