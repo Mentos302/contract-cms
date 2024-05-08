@@ -32,12 +32,13 @@
                             <tbody>
                                 @foreach ($contracts_status as $key => $item)
                                     <tr>
-                                        <td><a href="{{ route('contract.show', $item->id) }}">#{{ $item->number }}</a></td>
+                                        <td><a href="{{ route('contract.show', $item->id) }}">#{{ $item->id }}</a></td>
                                         <td>{{ $item->manufacturer->name }}</td>
                                         <td>{{ $item->type->name }}</td>
                                         <td>{{ $item->serial_number }}</td>
                                         <td>{{ $item->mfr_contract_number }}</td>
-                                        <td>{{ $item->term->name }} Year</td>
+                                        <td>{{ $item->term->name == 1 ? $item->term->name . ' Year' : $item->term->name . ' Years' }}
+                                        </td>
                                         <td>{{ formatDate($item->start_date) }}</td>
                                         <td>{{ formatDate($item->end_date) }}</td>
                                         <td>${{ $item->contract_price }}</td>

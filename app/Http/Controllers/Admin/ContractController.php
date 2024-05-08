@@ -111,4 +111,70 @@ class ContractController extends Controller {
 		$contract->delete();
 		return redirect()->route( 'contract.index' )->with( 'delete', 'Contract deleted successfully.' );
 	}
+
+	public function contractsImport( Request $request ) {
+		$this->validate( $request, [ 
+			'csv_file' => 'required|mimes:csv,txt|max:10240',
+		] );
+
+		if ( $request->hasFile( 'csv_file' ) ) {
+			$file = $request->file( 'csv_file' );
+
+			$csvData = array_map( 'str_getcsv', file( $file ) );
+
+			$errorRows = [];
+
+			$rowNumber = 0;
+
+			foreach ( $csvData as $row ) {
+				$rowNumber++;
+
+				if ( $rowNumber === 1 ) {
+					continue;
+				}
+
+				$type = Type::where( 'name', $row[0] )->first();
+				if ( ! $type ) {
+					$type = Type::firstOrCreate( [ 'name' => 'Contract' ] );
+				}
+
+				$manufacturer = Manufacturer::where( 'name', $row[1] )->first();
+				if ( ! $manufacturer ) {
+					$errorRows[] = 'Row ' . $rowNumber . ': The specified manufacturer is not supported: ' . $row[1];
+					continue;
+				}
+
+				// Find the term
+				$term = Term::where( 'name', $row[2] )->first();
+				if ( ! $term ) {
+					$errorRows[] = 'Row ' . $rowNumber . ': The specified term is not supported: ' . $row[2];
+					continue;
+				}
+
+				Contract::create( [ 
+					'customer_id' => auth()->user()->id,
+					'type_id' => $type->id,
+					'manufacturer_id' => $manufacturer->id,
+					'term_id' => $term->id,
+					'start_date' => Carbon::createFromFormat( 'm/d/Y', $row[3] )->toDateString(),
+					'end_date' => Carbon::createFromFormat( 'm/d/Y', $row[4] )->toDateString(),
+					'location' => $row[5],
+					'contract_price' => $row[6],
+					'contract_owner' => $row[7] === "Sivility Systems" ? $row[7] : "Other Partner",
+					'serial_number' => $row[8],
+					'mfr_contract_number' => $row[9],
+					'name' => $row[10] ?? null,
+				] );
+			}
+
+			if ( ! empty( $errorRows ) ) {
+				return redirect( '/contract' )->with( 'errors', $errorRows );
+			}
+
+			return redirect( '/contract' )->with( 'success', 'Contracts imported successfully' );
+		}
+
+		return redirect( '/contract' )->with( 'error', 'CSV file upload failed' );
+	}
+
 }

@@ -18,7 +18,6 @@ class Contract extends Model {
 		'status',
 		'end_date',
 		'renewal_date',
-		'number',
 		'location',
 		'serial_number',
 		'mfr_contract_number',

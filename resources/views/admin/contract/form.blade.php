@@ -12,6 +12,20 @@
         @endslot
     @endcomponent
     <div class="col-md-12">
+        @if (session('errors'))
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach (session('errors') as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
         <form
             action="{{ isset($contract) && $contract->id ? route('contract.update', $contract->id) : route('contract.store') }}"
             method="POST">
@@ -20,8 +34,14 @@
             @endif
             @csrf()
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between">
                     {{ isset($contract) ? __('Update contract') : __('Add New Contract') }}
+                    @if (!isset($contract))
+                        <button class="btn btn-sm btn-primary delete-btn" type="button" data-bs-toggle="modal"
+                            data-bs-target="#importCSVModal">
+                            Import CSV
+                        </button>
+                    @endif
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -30,6 +50,7 @@
                                 <label class="form-label">Customer
                                     <a href="{{ route('customer.index') }}/create"
                                         class="new-contract-btn btn btn-primary btn-sm">Add New</a>
+
                                 </label>
                                 <select class="form-control" name="customer_id" required>
                                     <option value=""> Select Customer</option>
@@ -178,6 +199,29 @@
             </div>
         </form>
     </div>
+    <div class="modal fade" id="importCSVModal" tabindex="-1" role="dialog" aria-labelledby="importCSVLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="avatarUploadModalLabel">Contracts import CSV</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('contracts.import') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <input type="file" name="csv_file" id="csvFileInput" class="form-control" accept=".csv"
+                            required>
+                        <div class="image-modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Upload</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('script')
@@ -192,8 +236,6 @@
                 if (contractOwner.val() === 'Sivility Systems') {
                     contractProviderInput.val('Sivility Systems');
                     contractProviderDiv.hide();
-
-                    console.log(contractProviderInput.val());
                 } else {
                     contractProviderInput.val('');
                     contractProviderDiv.show();

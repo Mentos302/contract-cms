@@ -19,9 +19,9 @@ Route::get( '/', function () {
 	return redirect()->route( 'login' );
 } );
 
-// Route::get( '/register', function () {
-// 	return redirect()->route( 'login' );
-// } );
+// Route::get('/register', function () {
+// 	return redirect()->route('login');
+// });
 
 Route::group( [ 'middleware' => 'auth' ], function () {
 	//Update User Details
@@ -41,12 +41,11 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 		Route::resource( 'term', App\Http\Controllers\Admin\TermController::class);
 		Route::resource( 'customer', App\Http\Controllers\Admin\CustomerController::class);
 		Route::resource( 'renewal', App\Http\Controllers\Admin\RenewalController::class);
-
 	} );
 
 	Route::group( [ 'middleware' => [ 'role:admin|customer' ] ], function () {
 		Route::resource( 'contract', App\Http\Controllers\Admin\ContractController::class);
-
+		Route::post( '/contracts/import', [ App\Http\Controllers\Admin\ContractController::class, 'contractsImport' ] )->name( 'contracts.import' );
 		Route::post( '/', [ App\Http\Controllers\Admin\SettingController::class, 'store' ] )->name( 'setting.store' );
 
 		Route::get( 'contracts-status', [ App\Http\Controllers\HomeController::class, 'contractsStatus' ] )->name( 'contracts.status' );
@@ -59,8 +58,6 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 		} );
 
 		Route::post( '/renewal/store', [ App\Http\Controllers\Admin\RenewalController::class, 'storeCustomerRenewal' ] )->name( 'renewal.store.customer' );
-
 	} );
-
-
 } );
+

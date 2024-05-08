@@ -7,7 +7,7 @@
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
                     <li class="breadcrumb-item"><a href="javascript: void(0);">{{ $li_1 }}</a></li>
-                    @if(isset($title))
+                    @if (isset($title))
                         <li class="breadcrumb-item active">{{ $title }}</li>
                     @endif
                 </ol>
@@ -18,15 +18,14 @@
 </div>
 <!-- end page title -->
 @auth
-@if ($errors->any())
-<div class="alert alert-danger" role="alert">
-    <ul class="m-0">
-        @foreach ($errors->all() as $error)
-        <li>{{$error}}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
+    @if (session('errors'))
+        <div class="alert alert-danger" role="alert">
+            <ul class="m-0">
+                @foreach (session('errors') as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 @endauth
 @include('admin.shared.alerts')
-
