@@ -40,12 +40,45 @@
                             <div class="card-body p-4">
                                 <div class="text-center mt-2">
                                     <h5 class="text-primary">Create New Account</h5>
-                                    <p class="text-muted">Get your free velzon account now</p>
+                                    <p class="text-muted">Get your free account now</p>
                                 </div>
                                 <div class="p-2 mt-4">
                                     <form class="needs-validation" novalidate method="POST"
                                         action="{{ route('register') }}" enctype="multipart/form-data">
                                         @csrf
+                                        <div class="mb-3">
+                                            <label for="useremail" class="form-label">First Name <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text"
+                                                class="form-control @error('first_name') is-invalid @enderror"
+                                                name="first_name" value="{{ old('first_name') }}" id="first_name"
+                                                placeholder="Enter first name" required>
+                                            @error('first_name')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                            <div class="invalid-feedback">
+                                                Please enter first name
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="useremail" class="form-label">Last Name <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text"
+                                                class="form-control @error('last_name') is-invalid @enderror"
+                                                name="last_name" value="{{ old('last_name') }}" id="last_name"
+                                                placeholder="Enter last name" required>
+                                            @error('last_name')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                            <div class="invalid-feedback">
+                                                Please enter last name
+                                            </div>
+                                        </div>
+
                                         <div class="mb-3">
                                             <label for="useremail" class="form-label">Email <span
                                                     class="text-danger">*</span></label>
@@ -91,7 +124,7 @@
                                         </div>
                                         <div class="mb-3">
                                             <p class="mb-0 fs-12 text-muted fst-italic">By registering you agree to the
-                                                CMS <a href="#"
+                                                CMS <a href="https://sivility.com/terms__conditions/" target="_blank"
                                                     class="text-primary text-decoration-underline fst-normal fw-medium">Terms
                                                     of Use</a></p>
                                         </div>

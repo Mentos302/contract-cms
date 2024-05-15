@@ -77,20 +77,23 @@
             <h1>Welcome to CMS by Sivility Systems</h1>
         </div>
         <div class="content">
-            <p>Dear user,</p>
-            <p>Your account has been created successfully. Here are your login details:</p>
+            <p>Dear {{ $first_name }},</p>
+            <p>Your CMS account with Sivility Systems has been created successfully. Now you can manage all your
+                contracts in one place. Here are your new login credentials.
+            </p>
             <p><strong>Email:</strong> {{ $email }}</p>
             <p><strong>Password:</strong> <span
                     style="background-color: #f2f2f2; padding: 5px 10px; border-radius: 5px;">{{ $password }}</span>
             </p>
-            <p style="font-size: 12px;">Please note that this is an automatically generated password. We recommend that
-                you change it in your
-                account settings after logging in for the first time.</p>
+            <p style="font-size: 12px;">
+                Please note that this is an automatically generated password. We recommend that
+                you change it in your account settings after logging in for the first time.
+            </p>
             <p>You can login <a href="{{ route('login') }}" class="btn">here</a>.</p>
         </div>
         <div class="footer">
-            <p>Best regards,</p>
-            <p>Sivility Systems</p>
+            <img src="https://1b3042.a2cdn1.secureserver.net/wp-content/uploads/2023/08/Sivility-logo-3-21.png"
+                style="width: 100%; max-width: 320px" alt="">
         </div>
     </div>
 </body>

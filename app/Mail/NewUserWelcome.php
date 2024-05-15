@@ -11,15 +11,20 @@ class NewUserWelcome extends Mailable {
 
 	public $email;
 	public $password;
+	public $first_name;
 
 	/**
 	 * Create a new message instance.
 	 *
+	 * @param string $email
+	 * @param string|null $password
+	 * @param string $first_name
 	 * @return void
 	 */
-	public function __construct( $email, $password = null ) {
+	public function __construct( $email, $first_name, $password = null ) {
 		$this->email = $email;
 		$this->password = $password;
+		$this->first_name = $first_name;
 	}
 
 	/**

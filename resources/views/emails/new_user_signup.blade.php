@@ -77,10 +77,10 @@
             <h1>Welcome to CMS by Sivility Systems</h1>
         </div>
         <div class="content">
-            <p>Dear user,</p>
-            <p>Welcome to CMS by Sivility Systems!</p>
+            <p>Dear {{ $first_name }},</p>
+            <p>Welcome to CMS by Sivility Systems. Now you can manage all your contracts in one place.</p>
             <p>We are excited to inform you that your account has been successfully created. You are now part of our
-                platform.</p>
+                platform. </p>
             <p style="font-size: 12px;">You can now log in and start exploring our features and services. We recommend
                 that you complete your
                 profile information by clicking <a href="{{ route('user.profile') }}" target="_blank">here</a>.</p>
@@ -88,8 +88,8 @@
             <p>You can login <a href="{{ route('login') }}" class="btn">here</a>.</p>
         </div>
         <div class="footer">
-            <p>Best regards,</p>
-            <p>Sivility Systems</p>
+            <img src="https://1b3042.a2cdn1.secureserver.net/wp-content/uploads/2023/08/Sivility-logo-3-21.png"
+                style="width: 100%; max-width: 320px" alt="">
         </div>
     </div>
 </body>
