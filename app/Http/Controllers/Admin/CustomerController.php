@@ -7,6 +7,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewUserWelcome;
 
 class CustomerController extends Controller {
 	public function index( Request $request ) {
@@ -16,9 +19,9 @@ class CustomerController extends Controller {
 		] );
 		$search = $request->input( 'search' );
 		$limit = $request->input( 'limit' ) ?? 15;
-		$qry = User::select( '*' )->role( 'customer' )->latest();
+		$qry = User::role( 'customer' )->latest();
 		if ( ! empty( $search ) ) {
-			$qry->where( 'name', 'like', '%' . $search . '%' );
+			$qry->where( 'email', 'like', '%' . $search . '%' );
 		}
 		$customers = $qry->paginate( $limit );
 		return view( 'admin.customer.index', compact( 'customers' ) );
@@ -31,13 +34,20 @@ class CustomerController extends Controller {
 	public function store( Request $request ) {
 		$request->validate( [ 
 			'email' => [ 'required', 'string', 'email', 'max:255', 'unique:users' ],
-			'password' => [ 'required', 'string', 'min:8', 'confirmed' ],
 		] );
-		$requestData = $request->except( [ '_token', 'method' ] );
-		$requestData['password'] = Hash::make( $request->password );
-		$customer = User::create( $requestData );
+
+		$password = Str::random( 10 );
+
+		$customer = User::create( [ 
+			'email' => $request->email,
+			'password' => Hash::make( $password ),
+		] );
+
 		$customer->assignRole( 'customer' );
-		return redirect()->route( 'customer.index' )->with( 'success', 'Customer added Successfully.' );
+
+		Mail::to( $request->email )->send( new NewUserWelcome( $request->email, $password ) );
+
+		return redirect()->route( 'customer.index' )->with( 'success', 'Customer added Successfully. Credentials sent to email.' );
 	}
 
 	public function edit( $id ) {

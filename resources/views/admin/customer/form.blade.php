@@ -18,7 +18,7 @@
             @if (isset($customer))
                 @method('PUT')
             @endif
-            @csrf()
+            @csrf
             <div class="card">
                 <div class="card-header">
                     {{ isset($customer) ? __('Update customer') : __('Add New Customer') }}
@@ -26,26 +26,56 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" autocomplete="off" name="name"
-                                placeholder="Enter customer name"
-                                value="{{ isset($customer) ? $customer->name : old('name') }}" />
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control @error('first_name') is-invalid @enderror"
+                                name="first_name" placeholder="Enter customer first name"
+                                value="{{ isset($customer) ? $customer->first_name : old('first_name') }}" required />
+                            @error('first_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control @error('last_name') is-invalid @enderror"
+                                name="last_name" placeholder="Enter customer last name"
+                                value="{{ isset($customer) ? $customer->last_name : old('last_name') }}" required />
+                            @error('last_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" autocomplete="off" name="email"
-                                placeholder="Enter customer email"
-                                value="{{ isset($customer) ? $customer->email : old('email') }}" autocomplete="off" />
+                            <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                autocomplete="off" name="email" placeholder="Enter customer email"
+                                value="{{ isset($customer) ? $customer->email : old('email') }}" required
+                                autocomplete="off" />
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" class="form-control" autocomplete="new-password" name="new-password"
-                                placeholder="Enter password" />
+                            <label class="form-label">Job Title</label>
+                            <input type="text" class="form-control" name="job_title"
+                                placeholder="Enter customer job title"
+                                value="{{ isset($customer) ? $customer->job_title : old('job_title') }}" />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" autocomplete="false" name="password_confirmation"
-                                placeholder="Confirm password" />
+                            <label class="form-label">Department</label>
+                            <input type="text" class="form-control" name="department"
+                                placeholder="Enter customer department"
+                                value="{{ isset($customer) ? $customer->department : old('department') }}" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Company Name</label>
+                            <input type="text" class="form-control" name="company_name"
+                                placeholder="Enter customer company name"
+                                value="{{ isset($customer) ? $customer->company_name : old('company_name') }}" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" name="phone"
+                                placeholder="Enter customer phone number"
+                                value="{{ isset($customer) ? $customer->phone : old('phone') }}" />
                         </div>
                     </div>
                 </div>

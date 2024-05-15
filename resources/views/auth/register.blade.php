@@ -90,23 +90,9 @@
                                                 <i data-feather="lock"></i>
                                             </div>
                                         </div>
-                                        {{-- <div class="mb-3">
-                                            <label for="input-avatar">Avatar <span class="text-danger">*</span></label>
-                                            <input type="file" class="form-control @error('avatar') is-invalid @enderror"
-                                                name="avatar" id="input-avatar" required>
-                                            @error('avatar')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                            @enderror
-                                            <div class="">
-                                                <i data-feather="file"></i>
-                                            </div>
-                                        </div> --}}
-
                                         <div class="mb-3">
                                             <p class="mb-0 fs-12 text-muted fst-italic">By registering you agree to the
-                                                Velzon <a href="#"
+                                                CMS <a href="#"
                                                     class="text-primary text-decoration-underline fst-normal fw-medium">Terms
                                                     of Use</a></p>
                                         </div>
@@ -136,22 +122,6 @@
         </div>
         <!-- end auth page content -->
 
-        <!-- footer -->
-        <footer class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="text-center">
-                            <script>
-                                document.write(new Date().getFullYear())
-                            </script> Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by
-                            Themesbrand</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </footer>
-        <!-- end Footer -->
     </div>
     <!-- end auth-page-wrapper -->
 @endsection

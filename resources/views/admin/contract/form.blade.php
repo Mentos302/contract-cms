@@ -32,8 +32,8 @@
             @if (isset($contract))
                 @method('PUT')
             @endif
-            @csrf()
-            <div class="card">
+            @csrf
+            <div classs="card">
                 <div class="card-header d-flex justify-content-between">
                     {{ isset($contract) ? __('Update contract') : __('Add New Contract') }}
                     @if (!isset($contract))
