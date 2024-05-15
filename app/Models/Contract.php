@@ -15,16 +15,14 @@ class Contract extends Model {
 		'distributor_id',
 		'term_id',
 		'start_date',
-		'status',
 		'end_date',
-		'renewal_date',
+		'status',
 		'location',
 		'serial_number',
 		'mfr_contract_number',
 		'name',
 		'contract_price',
 		'contract_cost',
-		'contract_revenue',
 		'contract_progress',
 		'contract_owner'
 	];

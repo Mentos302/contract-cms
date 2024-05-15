@@ -65,11 +65,6 @@
                             <label class="form-label">Contract Cost (USD)</label>
                             <input type="text" class="form-control" value="{{ $contract->contract_cost }}" readonly />
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Contract Progress (%)</label>
-                            <input type="text" class="form-control" value="{{ $contract->contract_progress }}"
-                                readonly />
-                        </div>
                     @endif
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Serial Number</label>

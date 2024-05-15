@@ -12,20 +12,6 @@
         @endslot
     @endcomponent
     <div class="col-md-12">
-        @if (session('errors'))
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach (session('errors') as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @endif
         <form
             action="{{ isset($contract) && $contract->id ? route('contract.update', $contract->id) : route('contract.store') }}"
             method="POST">
@@ -33,7 +19,7 @@
                 @method('PUT')
             @endif
             @csrf
-            <div classs="card">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between">
                     {{ isset($contract) ? __('Update contract') : __('Add New Contract') }}
                     @if (!isset($contract))
@@ -57,7 +43,7 @@
                                     @foreach ($customers as $customerId => $customerName)
                                         <option value="{{ $customerId }}"
                                             {{ isset($contract) && ($contract->customer_id == $customerId || old('customer_id') == $customerId) ? 'selected' : '' }}>
-                                            {{ $customerName }}
+                                            {{ $customerName ? $customerName : '' }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -72,7 +58,7 @@
 
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Select Type</label>
-                            <select class="form-control" name="type_id" required>
+                            <select class="form-control" name="type_id">
                                 <option value=""> Select Type</option>
                                 @foreach ($types as $key => $item)
                                     <option value="{{ $key }}"
@@ -107,25 +93,21 @@
                         @endif
 
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Select Term</label>
-                            <select class="form-control" name="term_id" required>
-                                <option value=""> Select Term</option>
-                                @foreach ($terms as $key => $item)
-                                    <option value="{{ $key }}"
-                                        {{ (isset($contract) && $contract->term_id == $key) || old('term_id') == $key ? "selected='selected'" : '' }}>
-                                        {{ $item }} Year</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3 mb-3">
                             <label class="form-label">Start Date</label>
                             <input type="date" class="form-control" name="start_date"
                                 value="{{ isset($contract) ? $contract->start_date : old('start_date') }}" required />
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">End Date</label>
-                            <input type="date" class="form-control" name="end_date"
-                                value="{{ isset($contract) ? $contract->end_date : old('end_date') }}" required />
+                            <label class="form-label">Select Term</label>
+                            <select class="form-control" name="term_id" required>
+                                <option value=""> Select Term</option>
+
+                                @foreach ($terms as $key => $item)
+                                    <option value="{{ $key }}"
+                                        {{ (isset($contract) && $contract->term_id == $key) || old('term_id') == $key ? "selected='selected'" : '' }}>
+                                        {{ $item == 1 ? $item . ' Year' : $item . ' Years' }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Location</label>
@@ -177,14 +159,6 @@
                                 <input type="number" class="form-control" step="any" name="contract_cost"
                                     value="{{ isset($contract) ? $contract->contract_cost : old('contract_cost') }}"
                                     required />
-                            </div>
-                        @endif
-                        @if (Auth::user()->hasRole('admin'))
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Contract Progress (%)</label>
-                                <input type="number" min="0" max="100" class="form-control"
-                                    name="contract_progress"
-                                    value="{{ isset($contract) ? $contract->contract_progress : 0 }}" required />
                             </div>
                         @endif
                     </div>

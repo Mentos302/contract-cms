@@ -18,12 +18,24 @@
 </div>
 <!-- end page title -->
 @auth
-    @if (session('errors'))
-        <div class="alert alert-danger" role="alert">
-            <ul class="m-0">
-                @foreach (session('errors') as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+    @if (is_array(session('errors')) || $errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @if (is_array(session('errors')) && count(session('errors')) > 0)
+                    @foreach (session('errors') as $error)
+                        @if (is_array($error))
+                            @foreach ($error as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        @else
+                            <li>{{ $error }}</li>
+                        @endif
+                    @endforeach
+                @elseif ($errors->any())
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                @endif
             </ul>
         </div>
     @endif

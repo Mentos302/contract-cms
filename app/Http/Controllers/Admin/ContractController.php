@@ -20,24 +20,35 @@ class ContractController extends Controller {
 			'search' => 'nullable',
 			'limit' => 'nullable',
 		] );
+
 		$user = Auth::user();
 		$search = $request->input( 'search' );
 		$limit = $request->input( 'limit' ) ?? 15;
+
 		$qry = Contract::select( '*' )->latest();
+
 		if ( ! empty( $search ) ) {
 			$qry->where( 'number', 'like', '%' . $search . '%' );
 		}
-		if ( $user->hasRole( 'customer' ) ) {
+
+		if ( ! $user->hasRole( 'admin' ) ) {
 			$qry->where( 'customer_id', $user->id );
 		}
+
 		$contracts = $qry->paginate( $limit );
+
 		return view( 'admin.contract.index', compact( 'contracts' ) );
 	}
+
 	public function create() {
 		$customers = User::role( 'customer' )->get()->map( function ($customer) {
+			$name = $customer->first_name && $customer->last_name ?
+				$customer->first_name . ' ' . $customer->last_name . ' (' . $customer->email . ')' :
+				$customer->email;
+
 			return [ 
 				'id' => $customer->id,
-				'name' => $customer->first_name . ' ' . $customer->last_name
+				'name' => $name,
 			];
 		} )->pluck( 'name', 'id' );
 
@@ -53,24 +64,23 @@ class ContractController extends Controller {
 		$contract = Contract::findOrFail( $id );
 		return view( 'admin.contract.show', compact( 'contract' ) );
 	}
+
 	public function store( ContractCreateRequest $request ) {
 		$requestData = $request->validated();
 		$requestData['customer_id'] = $request->customer_id;
 		$requestData['number'] = rand( 10000, 99999 ) . Contract::count();
 
+		$term = Term::findOrFail( $requestData['term_id'] );
 
-		if ( $request->has( 'contract_price' ) && $request->has( 'contract_cost' ) ) {
-			$requestData['contract_revenue'] = $request->contract_price - $request->contract_cost;
-		}
+		$startDate = Carbon::parse( $requestData['start_date'] );
+		$endDate = $startDate->copy()->addYears( $term->name );
+		$requestData['end_date'] = $endDate->toDateString();
 
-		$contract = Contract::create( $requestData );
+		Contract::create( $requestData );
 
-		// $startDate = Carbon::parse($requestData['start_date']);
-		// $renewalDate = $startDate->addYear($contract->term->name);
-		// $contract->renewal_date= $renewalDate->format('Y-m-d');
-		// $contract->save();
 		return redirect()->route( 'contract.index' )->with( 'success', 'Contract added Successfully.' );
 	}
+
 	public function edit( $id ) {
 		$contract = Contract::findOrFail( $id );
 		$customers = User::role( 'customer' )->get()->map( function ($customer) {
@@ -79,33 +89,35 @@ class ContractController extends Controller {
 				'name' => $customer->first_name . ' ' . $customer->last_name
 			];
 		} )->pluck( 'name', 'id' );
+
 		$types = Type::pluck( 'name', 'id' );
 		$manufacturers = Manufacturer::pluck( 'name', 'id' );
 		$distributors = Distributor::pluck( 'name', 'id' );
 		$terms = Term::pluck( 'name', 'id' );
+
 		return view( 'admin.contract.form', compact( 'contract', 'customers', 'types', 'manufacturers', 'distributors', 'terms' ) );
 	}
+
+
 	public function update( ContractCreateRequest $request, $id ) {
 		$contract = Contract::findOrFail( $id );
 		$requestData = $request->validated();
 		$requestData['customer_id'] = $request->customer_id;
-
-		if ( $request->has( 'contract_price' ) && $request->has( 'contract_cost' ) ) {
-			$requestData['contract_revenue'] = $request->contract_price - $request->contract_cost;
-		}
-
 		$requestData['serial_number'] = $request->serial_number;
 		$requestData['mfr_contract_number'] = $request->mfr_contract_number;
 		$requestData['name'] = $request->name;
-		$contract->update( $requestData );
 
-		// $startDate = Carbon::parse($requestData['start_date']);
-		// $renewalDate = $startDate->addYear($contract->term->name);
-		// $contract->renewal_date= $renewalDate->format('Y-m-d');
-		// $contract->save();
+		$term = Term::findOrFail( $requestData['term_id'] );
+		$startDate = Carbon::parse( $requestData['start_date'] );
+		$endDate = $startDate->copy()->addYears( $term->name );
+		$requestData['end_date'] = $endDate->toDateString();
+
+		$contract->update( $requestData );
 
 		return redirect()->route( 'contract.index' )->with( 'success', 'Contract updated successfully.' );
 	}
+
+
 	public function destroy( Request $request, $id ) {
 		$contract = Contract::findOrFail( $id );
 		$contract->delete();
@@ -144,26 +156,28 @@ class ContractController extends Controller {
 					continue;
 				}
 
-				// Find the term
-				$term = Term::where( 'name', $row[2] )->first();
+				$term = Term::where( 'name', $row[3] )->first();
 				if ( ! $term ) {
-					$errorRows[] = 'Row ' . $rowNumber . ': The specified term is not supported: ' . $row[2];
+					$errorRows[] = 'Row ' . $rowNumber . ': The specified term is not supported: ' . $row[3];
 					continue;
 				}
+
+				$startDate = Carbon::createFromFormat( 'm/d/Y', $row[2] );
+				$endDate = $startDate->copy()->addYears( $term->name );
 
 				Contract::create( [ 
 					'customer_id' => auth()->user()->id,
 					'type_id' => $type->id,
 					'manufacturer_id' => $manufacturer->id,
 					'term_id' => $term->id,
-					'start_date' => Carbon::createFromFormat( 'm/d/Y', $row[3] )->toDateString(),
-					'end_date' => Carbon::createFromFormat( 'm/d/Y', $row[4] )->toDateString(),
-					'location' => $row[5],
-					'contract_price' => $row[6],
-					'contract_owner' => $row[7] === "Sivility Systems" ? $row[7] : "Other Partner",
-					'serial_number' => $row[8],
-					'mfr_contract_number' => $row[9],
-					'name' => $row[10] ?? null,
+					'start_date' => $startDate->toDateString(),
+					'end_date' => $endDate->toDateString(),
+					'location' => $row[4],
+					'contract_price' => $row[5],
+					'contract_owner' => $row[6] === "Sivility Systems" ? $row[6] : "Other Partner",
+					'serial_number' => $row[7],
+					'mfr_contract_number' => $row[8],
+					'name' => $row[9] ?? null,
 				] );
 			}
 
@@ -176,5 +190,5 @@ class ContractController extends Controller {
 
 		return redirect( '/contract' )->with( 'error', 'CSV file upload failed' );
 	}
-
 }
+

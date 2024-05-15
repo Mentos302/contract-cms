@@ -17,7 +17,6 @@ class ContractCreateRequest extends FormRequest {
 			'manufacturer_id' => 'required|exists:manufacturers,id',
 			'term_id' => 'required|exists:terms,id',
 			'start_date' => 'required|date',
-			'end_date' => 'required|date|after:start_date',
 			'serial_number' => 'nullable|string|max:255',
 			'mfr_contract_number' => 'nullable|string|max:255',
 			'name' => 'nullable|string|max:255',

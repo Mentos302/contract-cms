@@ -38,6 +38,7 @@ File: Custom Css File
 
 .customer-dashboard-card {
     height: 55px;
+    overflow: hidden;
     .card-footer {
         font-size: 18px;
         font-weight: 600;
@@ -102,4 +103,8 @@ File: Custom Css File
     top: 2px;
     right: 14px;
     padding-right: 1rem;
+}
+
+div.alert-danger ul {
+    margin: 0;
 }

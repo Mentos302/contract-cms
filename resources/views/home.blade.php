@@ -400,7 +400,7 @@
                                                         {{ $item->manufacturer->name }} </p>
                                                     <p class="card-text text-muted mb-1">Quote# {{ $item->number }} </p>
                                                     <p class="card-text text-muted mb-1">Profit:
-                                                        {{ $item->contract_revenue }}
+                                                        {{ $item->contract_price - $item->contract_cost }}
                                                     </p>
                                                 </div>
                                                 <div class="align-content-end">

@@ -112,8 +112,12 @@ class HomeController extends Controller {
 
 	public function contractsStatus( Request $request ) {
 		$contracts_status = [];
+		$user = Auth::user();
+		$qry = Contract::query();
 
-		$qry = Contract::query()->where( 'contract_owner', 'Sivility Systems' );
+		if ( ! $user->hasRole( 'admin' ) ) {
+			$qry->where( 'customer_id', $user->id );
+		}
 
 		if ( $request->status == 'active' ) {
 			$contracts_status = $this->getActiveContracts( $qry );
@@ -126,8 +130,10 @@ class HomeController extends Controller {
 		return view( 'admin.contract.contract-status', compact( 'contracts_status' ) );
 	}
 
+
+
 	public function contractGraphByManufacturer() {
-		$contractsByManufacturer = Contract::select( 'manufacturer_id', DB::raw( 'COUNT(*) as total, sum(contract_revenue) as revenue' ) )
+		$contractsByManufacturer = Contract::select( 'manufacturer_id', DB::raw( 'COUNT(*) as total, sum(contract_price - contract_cost) as revenue' ) )
 			->where( 'contract_owner', 'Sivility Systems' )
 			->groupBy( 'manufacturer_id' )
 			->get();
@@ -149,6 +155,7 @@ class HomeController extends Controller {
 			'revenue' => $revenue,
 		];
 	}
+
 
 	public function nearestContract() {
 		$currentDate = Carbon::now();
@@ -210,14 +217,12 @@ class HomeController extends Controller {
 	}
 
 	public function revenueCount( $qry ) {
-		$totalContractRevenue = $qry->sum( 'contract_revenue' );
-		$minContractRevenue = $qry->min( 'contract_revenue' );
+		$totalContractRevenue = $qry->sum( DB::raw( 'contract_price - contract_cost' ) );
+		$minContractRevenue = $qry->min( DB::raw( 'contract_price - contract_cost' ) );
 		$renewalContractsCount = $qry->where( 'end_date', '>', Carbon::now() )->count();
 
 		return [ $totalContractRevenue, $minContractRevenue, $renewalContractsCount ];
 	}
-
-
 
 	public function calculateProfitRevenueByTerm( $term ) {
 		$contracts = Contract::where( 'contract_owner', 'Sivility Systems' )->get();
