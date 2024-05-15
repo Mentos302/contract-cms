@@ -1,8 +1,8 @@
-@extends( 'layouts.master-without-nav' )
-@section( 'title' )
-    @lang( 'translation.password-reset' )
+@extends('layouts.master-without-nav')
+@section('title')
+    @lang('translation.password-reset')
 @endsection
-@section( 'content' )
+@section('content')
     <div class="auth-page-wrapper pt-5">
         <!-- auth page bg -->
         <div class="auth-one-bg-position auth-one-bg" id="auth-particles">
@@ -24,11 +24,10 @@
                         <div class="text-center mt-sm-5 mb-4 text-white-50">
                             <div>
                                 <a href="/index" class="d-inline-block auth-logo">
-                                    <img src="{{ URL::asset( 'build/images/logo-light.webp' ) }}" alt=""
+                                    <img src="{{ URL::asset('build/images/logo-light.webp') }}" alt=""
                                         height="20">
                                 </a>
                             </div>
-                            <p class="mt-3 fs-15 fw-medium">Premium Admin & Dashboard Template</p>
                         </div>
                     </div>
                 </div>
@@ -53,19 +52,19 @@
                                     Enter your email and instructions will be sent to you!
                                 </div>
                                 <div class="p-2">
-                                    @if ( session( 'status' ) )
+                                    @if (session('status'))
                                         <div class="alert alert-success text-center mb-4" role="alert">
-                                            {{ session( 'status' ) }}
+                                            {{ session('status') }}
                                         </div>
                                     @endif
-                                    <form class="form-horizontal" method="POST" action="{{ route( 'password.email' ) }}">
+                                    <form class="form-horizontal" method="POST" action="{{ route('password.email') }}">
                                         @csrf
                                         <div class="mb-3">
                                             <label for="useremail" class="form-label">Email</label>
-                                            <input type="email" class="form-control @error( 'email' ) is-invalid @enderror"
+                                            <input type="email" class="form-control @error('email') is-invalid @enderror"
                                                 id="useremail" name="email" placeholder="Enter email"
-                                                value="{{ old( 'email' ) }}" id="email">
-                                            @error( 'email' )
+                                                value="{{ old('email') }}" id="email">
+                                            @error('email')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>
@@ -85,7 +84,7 @@
                         <!-- end card -->
 
                         <div class="mt-4 text-center">
-                            <p class="mb-0">Wait, I remember my password... <a href="{{ route( 'login' ) }}"
+                            <p class="mb-0">Wait, I remember my password... <a href="{{ route('login') }}"
                                     class="fw-semibold text-primary text-decoration-underline"> Click here </a> </p>
                         </div>
 
@@ -116,6 +115,6 @@
     </div>
     <!-- end auth-page-wrapper -->
 @endsection
-@section( 'script' )
-    <script src="{{ URL::asset( 'build/js/pages/eva-icon.init.js' ) }}"></script>
+@section('script')
+    <script src="{{ URL::asset('build/js/pages/eva-icon.init.js') }}"></script>
 @endsection
