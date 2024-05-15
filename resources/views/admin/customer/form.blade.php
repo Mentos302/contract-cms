@@ -26,7 +26,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">First Name</label>
+                            <label class="form-label">First Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('first_name') is-invalid @enderror"
                                 name="first_name" placeholder="Enter customer first name"
                                 value="{{ isset($customer) ? $customer->first_name : old('first_name') }}" required />
@@ -35,7 +35,7 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Last Name</label>
+                            <label class="form-label">Last Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('last_name') is-invalid @enderror"
                                 name="last_name" placeholder="Enter customer last name"
                                 value="{{ isset($customer) ? $customer->last_name : old('last_name') }}" required />
@@ -44,7 +44,7 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Email</label>
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" class="form-control @error('email') is-invalid @enderror"
                                 autocomplete="off" name="email" placeholder="Enter customer email"
                                 value="{{ isset($customer) ? $customer->email : old('email') }}" required
