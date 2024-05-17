@@ -14,6 +14,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ContractAddedNotification;
 
 class ContractController extends Controller {
 	public function index( Request $request ) {
@@ -77,10 +79,20 @@ class ContractController extends Controller {
 		$endDate = $startDate->copy()->addYears( $term->name );
 		$requestData['end_date'] = $endDate->toDateString();
 
-		Contract::create( $requestData );
+		$contract = Contract::create( $requestData );
+
+		$manufacturer = $contract->manufacturer;
+		$contractNumber = $contract->mfr_contract_number;
+
+		$customer = User::find( $contract->customer_id );
+
+		if ( $customer ) {
+			Mail::to( $customer->email )->send( new ContractAddedNotification( $contract, $manufacturer->name, $contractNumber ) );
+		}
 
 		return redirect()->route( 'contract.index' )->with( 'success', 'Contract added Successfully.' );
 	}
+
 
 	public function edit( $id ) {
 		$contract = Contract::findOrFail( $id );
