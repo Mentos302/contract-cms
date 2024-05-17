@@ -47,6 +47,8 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 		Route::resource( 'contract', App\Http\Controllers\Admin\ContractController::class);
 		Route::post( '/contracts/{id}/status', [ \App\Http\Controllers\Admin\ContractController::class, 'updateStatus' ] )->name( 'contract.update.status' );
 		Route::post( '/contracts/import', [ App\Http\Controllers\Admin\ContractController::class, 'contractsImport' ] )->name( 'contracts.import' );
+		Route::post( '/support-tickets', [ App\Http\Controllers\Admin\ContractController::class, 'createSupportTicket' ] )->name( 'support-tickets.create' );
+
 		Route::post( '/', [ App\Http\Controllers\Admin\SettingController::class, 'store' ] )->name( 'setting.store' );
 
 		Route::get( 'contracts-status', [ App\Http\Controllers\HomeController::class, 'contractsStatus' ] )->name( 'contracts.status' );

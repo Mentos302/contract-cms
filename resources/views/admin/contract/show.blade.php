@@ -44,7 +44,7 @@
         @endif
         <div class="card">
             <div class="card-header">
-                Contract #{{ $contract->id }} Details
+                <strong>{{ $contract->manufacturer->name }} Contract #{{ $contract->mfr_contract_number }} Details</strong>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -111,20 +111,65 @@
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <a href="/contracts-status?status=active" class="btn btn-sm btn-secondary">Back</a>
-                <a href="{{ route('contract.edit', $contract->id) }}" class="btn btn-sm btn-primary">Edit Contract</a>
-                @if (isset($contract))
-                    <button class="btn btn-sm btn-danger delete-btn" type="button" data-bs-toggle="modal"
-                        data-bs-target="#deleteModal">
-                        Delete Contract
-                    </button>
-                @endif
+            <div class="card-footer content d-flex justify-content-between">
+                <div>
+                    <a href="/contracts-status?status=active" class="btn btn-sm btn-secondary">Back</a>
+                    @if (isset($contract) &&
+                            isset($contract->type->name) &&
+                            $contract->type->name === 'Sivility Systems (3rd Party Maintenance)')
+                        <a data-bs-toggle="modal" data-bs-target="#createTicketModal" class="btn btn-sm btn-success">Support
+                            Ticket</a>
+                    @endif
+                </div>
+                <div>
+                    <a href="{{ route('contract.edit', $contract->id) }}" class="btn btn-sm btn-primary">Edit Contract</a>
+                    @if (isset($contract))
+                        <button class="btn btn-sm btn-danger delete-btn" type="button" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal">
+                            Delete Contract
+                        </button>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Delete Modal -->
+    <div class="modal fade" id="createTicketModal" tabindex="-1" role="dialog"
+        aria-labelledby="createTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTicketModalLabel">Create Support Ticket</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('support-tickets.create') }}" method="POST">
+                    <div class="modal-body">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="contract" class="form-label">Contract</label>
+                            <input type="text" class="form-control" id="contract" name="contract_name"
+                                value="{{ $contract->manufacturer->name }} Contract #{{ $contract->mfr_contract_number }}"
+                                readonly required>
+                            <input type="hidden" name="contract_id" value="{{ $contract->id }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">

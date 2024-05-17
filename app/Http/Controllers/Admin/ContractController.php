@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ContractAddedNotification;
+use App\Mail\SupportTicketNotification;
 
 class ContractController extends Controller {
 	public function index( Request $request ) {
@@ -220,6 +221,26 @@ class ContractController extends Controller {
 		}
 
 		return redirect( '/contract' )->with( 'error', 'CSV file upload failed' );
+	}
+
+	public function createSupportTicket( Request $request ) {
+		$validatedData = $request->validate( [ 
+			'subject' => 'required|string|max:255',
+			'message' => 'required|string|max:1000',
+			'contract_name' => 'required|string|max:255',
+			'contract_id' => 'required|exists:contracts,id',
+		] );
+
+		$ticket = array(
+			'subject' => $validatedData['subject'],
+			'message' => $validatedData['message'],
+			'contract_name' => $validatedData['contract_name'],
+			'contract_id' => $validatedData['contract_id'],
+		);
+
+		Mail::to( config( 'mail.support_email' ) )->send( new SupportTicketNotification( $ticket ) );
+
+		return redirect()->route( 'contract.show', $validatedData['contract_id'] )->with( 'success', 'Support ticket created successfully!' );
 	}
 }
 
