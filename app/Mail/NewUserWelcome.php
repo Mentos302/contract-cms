@@ -33,11 +33,13 @@ class NewUserWelcome extends Mailable {
 	 * @return $this
 	 */
 	public function build() {
+		$subject = "Welcome to CMS by Sivility Systems";
+
 		if ( $this->password ) {
-			return $this->subject( 'Welcome to our platform' )
+			return $this->subject( $subject )
 				->view( 'emails.new_user_created' );
 		} else {
-			return $this->subject( 'Welcome to our platform' )
+			return $this->subject( $subject )
 				->view( 'emails.new_user_signup' );
 		}
 	}

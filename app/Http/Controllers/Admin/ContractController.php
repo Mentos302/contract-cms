@@ -7,6 +7,7 @@ use App\Http\Requests\ContractCreateRequest;
 use App\Models\Contract;
 use App\Models\Distributor;
 use App\Models\Manufacturer;
+use App\Models\Renewal;
 use App\Models\Term;
 use App\Models\Type;
 use App\Models\User;
@@ -117,6 +118,24 @@ class ContractController extends Controller {
 		return redirect()->route( 'contract.index' )->with( 'success', 'Contract updated successfully.' );
 	}
 
+	public function updateStatus( Request $request, $id ) {
+		$request->validate( [ 
+			'renewal_option' => 'required|in:quote,not,another',
+		] );
+
+		if ( $request->renewal_option === 'quote' ) {
+			Renewal::create( [ 
+				'contract_id' => $id,
+				'status' => 'quote',
+			] );
+		}
+
+		$contract = Contract::findOrFail( $id );
+		$contract->status = $request->renewal_option;
+		$contract->save();
+
+		return redirect()->route( 'contract.show', $id )->with( 'success', 'Contract status updated successfully!' );
+	}
 
 	public function destroy( Request $request, $id ) {
 		$contract = Contract::findOrFail( $id );

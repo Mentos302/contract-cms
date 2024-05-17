@@ -45,6 +45,7 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 
 	Route::group( [ 'middleware' => [ 'role:admin|customer' ] ], function () {
 		Route::resource( 'contract', App\Http\Controllers\Admin\ContractController::class);
+		Route::post( '/contracts/{id}/status', [ \App\Http\Controllers\Admin\ContractController::class, 'updateStatus' ] )->name( 'contract.update.status' );
 		Route::post( '/contracts/import', [ App\Http\Controllers\Admin\ContractController::class, 'contractsImport' ] )->name( 'contracts.import' );
 		Route::post( '/', [ App\Http\Controllers\Admin\SettingController::class, 'store' ] )->name( 'setting.store' );
 
