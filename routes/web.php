@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ContractController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,12 +20,7 @@ Route::get( '/', function () {
 	return redirect()->route( 'login' );
 } );
 
-// Route::get('/register', function () {
-// 	return redirect()->route('login');
-// });
-
 Route::group( [ 'middleware' => 'auth' ], function () {
-	//Update User Details
 	Route::get( 'profile', [ App\Http\Controllers\Auth\ProfileController::class, 'profile' ] )->name( 'user.profile' );
 	Route::post( '/update-profile/{id}', [ App\Http\Controllers\Auth\ProfileController::class, 'updateProfile' ] )->name( 'updateProfile' );
 	Route::post( '/update-password/{id}', [ App\Http\Controllers\Auth\ProfileController::class, 'updatePassword' ] )->name( 'updatePassword' );
@@ -33,7 +29,7 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 
 	Route::get( 'index/{locale}', [ App\Http\Controllers\HomeController::class, 'lang' ] );
 	Route::get( '/home', [ App\Http\Controllers\HomeController::class, 'index' ] )->name( 'home' );
-	//check role
+
 	Route::group( [ 'middleware' => [ 'role:admin' ] ], function () {
 		Route::resource( 'type', App\Http\Controllers\Admin\TypeController::class);
 		Route::resource( 'manufacturer', App\Http\Controllers\Admin\ManufacturerController::class);
@@ -45,10 +41,9 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 
 	Route::group( [ 'middleware' => [ 'role:admin|customer' ] ], function () {
 		Route::resource( 'contract', App\Http\Controllers\Admin\ContractController::class);
-		Route::post( '/contracts/{id}/status', [ \App\Http\Controllers\Admin\ContractController::class, 'updateStatus' ] )->name( 'contract.update.status' );
-		Route::post( '/contracts/import', [ App\Http\Controllers\Admin\ContractController::class, 'contractsImport' ] )->name( 'contracts.import' );
-		Route::post( '/support-tickets', [ App\Http\Controllers\Admin\ContractController::class, 'createSupportTicket' ] )->name( 'support-tickets.create' );
-
+		Route::post( '/contracts/{id}/status', [ ContractController::class, 'updateStatus' ] )->name( 'contract.update.status' );
+		Route::post( '/contracts/import', [ ContractController::class, 'contractsImport' ] )->name( 'contracts.import' );
+		Route::post( '/support-tickets', [ ContractController::class, 'createSupportTicket' ] )->name( 'support-tickets.create' );
 		Route::post( '/', [ App\Http\Controllers\Admin\SettingController::class, 'store' ] )->name( 'setting.store' );
 
 		Route::get( 'contracts-status', [ App\Http\Controllers\HomeController::class, 'contractsStatus' ] )->name( 'contracts.status' );
@@ -61,6 +56,10 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 		} );
 
 		Route::post( '/renewal/store', [ App\Http\Controllers\Admin\RenewalController::class, 'storeCustomerRenewal' ] )->name( 'renewal.store.customer' );
+
+		// Add contract history routes
+		Route::post( '/contracts/{id}/history', [ ContractController::class, 'addHistory' ] )->name( 'contract.addHistory' );
+		Route::delete( '/contracts/{contractId}/history/{historyId}', [ App\Http\Controllers\Admin\ContractController::class, 'deleteHistory' ] )->name( 'contract.deleteHistory' );
+
 	} );
 } );
-

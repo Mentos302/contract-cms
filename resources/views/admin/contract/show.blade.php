@@ -107,7 +107,7 @@
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Name (Optional)</label>
-                        <input type="text" class="form-control" value="{{ $contract->optional_name }}" readonly />
+                        <input type="text" class="form-control" value="{{ $contract->name }}" readonly />
                     </div>
                 </div>
             </div>
@@ -131,7 +131,95 @@
                     @endif
                 </div>
             </div>
+
         </div>
+
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <strong>Contract History</strong>
+        </div>
+        <div class="card-body">
+            @if ($contract->histories->isEmpty())
+                <p>No history available for this contract.</p>
+            @else
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Quote Number</th>
+                            <th>Quote File</th>
+                            <th>Purchase Order Number</th>
+                            <th>PO File</th>
+                            <th>Invoice Number</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($contract->histories as $history)
+                            <tr>
+                                <td>{{ $history->year }}</td>
+                                <td>{{ $history->quote_number }}</td>
+                                <td><a href="{{ asset('storage/' . $history->quote_file) }}" target="_blank">View PDF</a>
+                                </td>
+                                <td>{{ $history->purchase_order_number }}</td>
+                                <td><a href="{{ asset('storage/' . $history->po_file) }}" target="_blank">View PDF</a>
+                                </td>
+                                <td>{{ $history->invoice_number }}</td>
+                                <td>
+                                    <form action="{{ route('contract.deleteHistory', [$contract->id, $history->id]) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Are you sure you want to delete this history entry?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <strong>Add Contract History</strong>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('contract.addHistory', $contract->id) }}" method="POST"
+                enctype="multipart/form-data">
+                @csrf
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="year" class="form-label">Year</label>
+                        <input type="number" name="year" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="quote_number" class="form-label">Quote Number</label>
+                        <input type="text" name="quote_number" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="quote_file" class="form-label">Quote File (PDF)</label>
+                        <input type="file" name="quote_file" class="form-control" accept="application/pdf" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="purchase_order_number" class="form-label">Purchase Order Number</label>
+                        <input type="number" name="purchase_order_number" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="po_file" class="form-label">PO File (PDF)</label>
+                        <input type="file" name="po_file" class="form-control" accept="application/pdf" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="invoice_number" class="form-label">Invoice Number</label>
+                        <input type="number" name="invoice_number" class="form-control" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add History</button>
+            </form>
+        </div>
+    </div>
     </div>
 
     <div class="modal fade" id="createTicketModal" tabindex="-1" role="dialog"
@@ -213,11 +301,13 @@
                     </div>
                     <div class="modal-body">
                         @if ($days_remaining == 'Expired')
-                            <p>Your contract number <strong>{{ $contract->mfr_contract_number }}</strong> has expired on
+                            <p>Your contract number <strong>{{ $contract->mfr_contract_number }}</strong> has expired
+                                on
                                 <strong>{{ $contract->end_date }}</strong>.
                             </p>
                         @else
-                            <p>Your contract number <strong>{{ $contract->mfr_contract_number }}</strong> is expiring in
+                            <p>Your contract number <strong>{{ $contract->mfr_contract_number }}</strong> is expiring
+                                in
                                 <strong>{{ $days_remaining }}</strong> days and must be renewed by
                                 <strong>{{ $contract->end_date }}</strong>.
                             </p>

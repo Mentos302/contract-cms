@@ -115,8 +115,11 @@
                                                 @foreach ($active_contracts as $item)
                                                     <tr>
                                                         <td class="customer-contract-success">
-                                                            <div class="fs-19">{{ $item->manufacturer->name }}
-                                                                #{{ $item->mfr_contract_number }}</div>
+                                                            <div class="fs-19"><a
+                                                                    href="{{ route('contract.show', $item->id) }}">
+                                                                    {{ $item->manufacturer->name }}
+                                                                    #{{ $item->mfr_contract_number }}
+                                                                </a></div>
                                                             <div class="d-flex py-4">
                                                                 <div>{{ formatDate($item->start_date) }}</div>
                                                                 <i class="px-2 ri-arrow-right-line "></i>

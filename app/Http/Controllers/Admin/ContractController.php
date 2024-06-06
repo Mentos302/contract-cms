@@ -11,6 +11,7 @@ use App\Models\Renewal;
 use App\Models\Term;
 use App\Models\Type;
 use App\Models\User;
+use App\Models\ContractHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -242,5 +243,53 @@ class ContractController extends Controller {
 
 		return redirect()->route( 'contract.show', $validatedData['contract_id'] )->with( 'success', 'Support ticket created successfully!' );
 	}
+
+	public function addHistory( Request $request, $contractId ) {
+		$request->validate( [ 
+			'year' => [ 
+				'required',
+				'integer',
+				function ($attribute, $value, $fail) use ($contractId) {
+					$exists = ContractHistory::where( 'contract_id', $contractId )
+						->where( 'year', $value )
+						->exists();
+					if ( $exists ) {
+						$fail( 'The year has already been taken for this contract.' );
+					}
+				},
+			],
+			'quote_number' => 'required|string',
+			'quote_file' => 'required|file|mimes:pdf',
+			'purchase_order_number' => 'required|integer',
+			'po_file' => 'required|file|mimes:pdf',
+			'invoice_number' => 'required|integer',
+		] );
+
+		$contract = Contract::findOrFail( $contractId );
+
+		$quoteFilePath = $request->file( 'quote_file' )->store( 'quotes', 'public' );
+		$poFilePath = $request->file( 'po_file' )->store( 'pos', 'public' );
+
+		$contract->histories()->create( [ 
+			'year' => $request->year,
+			'quote_number' => $request->quote_number,
+			'quote_file' => $quoteFilePath,
+			'purchase_order_number' => $request->purchase_order_number,
+			'po_file' => $poFilePath,
+			'invoice_number' => $request->invoice_number,
+		] );
+
+		return redirect()->route( 'contract.show', $contractId )->with( 'success', 'Contract history added successfully.' );
+	}
+
+	public function deleteHistory( $contractId, $historyId ) {
+		$contract = Contract::findOrFail( $contractId );
+		$history = $contract->histories()->findOrFail( $historyId );
+
+		$history->delete();
+
+		return redirect()->route( 'contract.show', $contractId )->with( 'success', 'Contract history deleted successfully.' );
+	}
+
 }
 
