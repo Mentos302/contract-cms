@@ -135,9 +135,10 @@ class RenewalController extends Controller {
 	}
 	public function destroy( Request $request, $id ) {
 		$renewal = Renewal::findOrFail( $id );
+		$contractId = $renewal->contract()->first()->id;
 		$renewal->delete();
 
-		return redirect()->route( 'renewal.index' )->with( 'delete', 'Contract deleted Successfully.' );
+		return redirect()->route( 'contract.show', $contractId )->with( 'success', 'Renewal Quote deleted successfully.' );
 	}
 	public function storeCustomerRenewal( RenewalCreateRequest $request ) {
 		$requestData = $request->validated();
