@@ -85,6 +85,7 @@ class HomeController extends Controller {
 	public function getActiveContracts( $qry ) {
 		return $qry->where( 'start_date', '<=', now() )
 			->where( 'end_date', '>=', now() )
+			->orderBy( 'end_date', 'asc' )
 			->get();
 	}
 
