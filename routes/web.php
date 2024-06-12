@@ -36,10 +36,10 @@ Route::group( [ 'middleware' => 'auth' ], function () {
 		Route::resource( 'distributor', App\Http\Controllers\Admin\DistributorController::class);
 		Route::resource( 'term', App\Http\Controllers\Admin\TermController::class);
 		Route::resource( 'customer', App\Http\Controllers\Admin\CustomerController::class);
-		Route::resource( 'renewal', App\Http\Controllers\Admin\RenewalController::class);
 	} );
 
 	Route::group( [ 'middleware' => [ 'role:admin|customer' ] ], function () {
+		Route::resource( 'renewal', App\Http\Controllers\Admin\RenewalController::class);
 		Route::resource( 'contract', App\Http\Controllers\Admin\ContractController::class);
 		Route::post( '/contracts/{id}/status', [ ContractController::class, 'updateStatus' ] )->name( 'contract.update.status' );
 		Route::post( '/contracts/import', [ ContractController::class, 'contractsImport' ] )->name( 'contracts.import' );
