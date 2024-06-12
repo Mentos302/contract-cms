@@ -43,7 +43,7 @@ class RenewalController extends Controller {
 			->map( function ($contract) {
 				return [ 
 					'id' => $contract->id,
-					'value' => $contract->distributor ? $contract->number . ' - ' . $contract->distributor->name : $contract->number,
+					'value' => $contract->mfr_contract_number ? '#' . $contract->mfr_contract_number . ' - ' . $contract->distributor->name : $contract->distributor->name,
 				];
 			} )
 			->pluck( 'value', 'id' );
@@ -65,13 +65,54 @@ class RenewalController extends Controller {
 
 		return view( 'admin.renewal.show', compact( 'selectedContract', 'renewal' ) );
 	}
+
 	public function store( RenewalCreateRequest $request ) {
-		$requestData = $request->validated();
+		$validatedData = $request->validated();
 
-		Renewal::create( $requestData );
+		$contract = Contract::findOrFail( $validatedData['contract_id'] );
 
-		return redirect()->route( 'renewal.index' )->with( 'success', 'Renewal added Successfully.' );
+		$year = isset( $validatedData['year'] ) ? $validatedData['year'] : null;
+
+		if ( $year && $contract->renewals()->whereYear( 'expiring_date', $year )->exists() ) {
+			return redirect()->back()->with( 'error', 'A renewal for this contract in the specified year already exists.' );
+		}
+
+
+		$quoteFilePath = $request->hasFile( 'quote_file' ) ? $request->file( 'quote_file' )->store( 'quotes', 'public' ) : null;
+		$poFilePath = $request->hasFile( 'po_file' ) ? $request->file( 'po_file' )->store( 'pos', 'public' ) : null;
+		$invoiceFilePath = $request->hasFile( 'invoice_file' ) ? $request->file( 'invoice_file' )->store( 'invoices', 'public' ) : null;
+
+		$renewalData = [ 
+			'contract_id' => $validatedData['contract_id'],
+			'quote_number' => $validatedData['quote_number'] ?? null,
+			'quote_file_path' => $quoteFilePath,
+			'purchase_order_number' => $validatedData['purchase_order_number'] ?? null,
+			'po_file_path' => $poFilePath,
+			'invoice_number' => $validatedData['invoice_number'] ?? null,
+			'invoice_file_path' => $invoiceFilePath,
+			'status' => $validatedData['status']
+		];
+
+		$renewal = new Renewal( $renewalData );
+
+		$contract = $renewal->contract;
+
+		if ( $contract ) {
+			if ( isset( $validatedData['year'] ) ) {
+				$contractEndDate = Carbon::parse( $contract->end_date );
+
+				$renewal->expiring_date = $contractEndDate->copy()->year( $validatedData['year'] );
+			} else {
+				$renewal->expiring_date = $contract->end_date;
+			}
+		}
+
+		$renewal->save();
+
+		return redirect()->route( 'contract.show', $validatedData['contract_id'] )->with( 'success', 'Contract renewal added successfully.' );
 	}
+
+
 	public function edit( $id ) {
 		$renewal = Renewal::findOrFail( $id );
 

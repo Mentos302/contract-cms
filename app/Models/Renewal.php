@@ -11,21 +11,18 @@ class Renewal extends Model {
 	protected $fillable = [ 
 		'contract_id',
 		'status',
+		'year',
 		'expiring_date',
+		'quote_number',
+		'quote_file',
+		'purchase_order_number',
+		'po_file',
+		'invoice_number',
+		'invoice_file'
 	];
-
-	protected static function boot() {
-		parent::boot();
-
-		static::creating( function ($renewal) {
-			$contract = $renewal->contract;
-			if ( $contract ) {
-				$renewal->expiring_date = $contract->end_date;
-			}
-		} );
-	}
 
 	public function contract() {
 		return $this->belongsTo( Contract::class);
 	}
 }
+

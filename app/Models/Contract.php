@@ -56,7 +56,4 @@ class Contract extends Model {
 		return $this->hasMany( Renewal::class);
 	}
 
-	public function histories() {
-		return $this->hasMany( ContractHistory::class);
-	}
 }

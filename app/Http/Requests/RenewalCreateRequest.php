@@ -20,7 +20,14 @@ class RenewalCreateRequest extends FormRequest {
 	public function rules(): array {
 		return [ 
 			'contract_id' => 'required|exists:contracts,id',
-			'status' => 'nullable|string|in:Open,Close won,Close lost',
+			'status' => 'required|in:Open,Close won,Close lost',
+			'year' => 'nullable|integer',
+			'quote_number' => 'required|string',
+			'quote_file' => 'nullable|file|mimes:pdf',
+			'purchase_order_number' => 'nullable|integer',
+			'po_file' => 'nullable|file|mimes:pdf',
+			'invoice_number' => 'nullable|integer',
+			'invoice_file' => 'nullable|file|mimes:pdf',
 		];
 	}
 }

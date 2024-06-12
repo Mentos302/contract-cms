@@ -11,11 +11,13 @@
             Contract
         @endslot
     @endcomponent
-    <div class="alert alert-warning alert-dismissible shadow fade show" role="alert">
-        <strong>Be careful!</strong> Contract data is used for calculating various metrics, please edit it only when
-        necessary.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    @if (isset($contract))
+        <div class="alert alert-warning alert-dismissible shadow fade show" role="alert">
+            <strong>Be careful!</strong> Contract data is used for calculating various metrics, please edit it only when
+            necessary.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="col-md-12">
         <form
             action="{{ isset($contract) && $contract->id ? route('contract.update', $contract->id) : route('contract.store') }}"
