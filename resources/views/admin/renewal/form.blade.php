@@ -111,7 +111,7 @@
                 </div>
                 <div class="card-footer">
                     <button class="btn btn-sm btn-success btn-submit" type="submit">Submit</button>
-                    <a href="{{ route('renewal.index') }}" class="btn btn-sm btn-secondary">Cancel</a>
+                    <button class="btn btn-sm btn-secondary" type="button" onclick="history.back()">Cancel</button>
                 </div>
             </div>
         </form>
