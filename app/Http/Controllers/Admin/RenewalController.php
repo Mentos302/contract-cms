@@ -77,7 +77,6 @@ class RenewalController extends Controller {
 			return redirect()->back()->with( 'error', 'A renewal for this contract in the specified year already exists.' );
 		}
 
-
 		$quoteFilePath = $request->hasFile( 'quote_file' ) ? $request->file( 'quote_file' )->store( 'quotes', 'public' ) : null;
 		$poFilePath = $request->hasFile( 'po_file' ) ? $request->file( 'po_file' )->store( 'pos', 'public' ) : null;
 		$invoiceFilePath = $request->hasFile( 'invoice_file' ) ? $request->file( 'invoice_file' )->store( 'invoices', 'public' ) : null;
@@ -85,11 +84,11 @@ class RenewalController extends Controller {
 		$renewalData = [ 
 			'contract_id' => $validatedData['contract_id'],
 			'quote_number' => $validatedData['quote_number'] ?? null,
-			'quote_file_path' => $quoteFilePath,
+			'quote_file' => $quoteFilePath,
 			'purchase_order_number' => $validatedData['purchase_order_number'] ?? null,
-			'po_file_path' => $poFilePath,
+			'po_file' => $poFilePath,
 			'invoice_number' => $validatedData['invoice_number'] ?? null,
-			'invoice_file_path' => $invoiceFilePath,
+			'invoice_file' => $invoiceFilePath,
 			'status' => $validatedData['status']
 		];
 
@@ -131,7 +130,9 @@ class RenewalController extends Controller {
 
 		$renewal->update( $requestData );
 
-		return redirect()->route( 'renewal.index' )->with( 'success', 'Contract updated Successfully.' );
+		$contractId = $renewal->contract()->first()->id;
+
+		return redirect()->route( 'contract.show', $contractId )->with( 'success', 'Renewal Quote deleted successfully.' );
 	}
 	public function destroy( Request $request, $id ) {
 		$renewal = Renewal::findOrFail( $id );

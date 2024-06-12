@@ -70,12 +70,10 @@
                         <div class="col-md-6 mb-3">
                             @if (isset($renewal->quote_file))
                                 <label for="quote_file" class="form-label">Update Quote File &#8226; <a
-                                        href="{{ asset($renewal->quote_file) }}" target="_blank">View Invoice File</a>
-                                </label>
+                                        href="{{ asset('storage/' . $renewal->quote_file) }}" target="_blank">View Invoice
+                                        File</a></label>
                             @else
-                                <label for="quote_file" class="form-label">Quote File
-                                    (PDF)
-                                </label>
+                                <label for="quote_file" class="form-label">Quote File (PDF)</label>
                             @endif
                             <input type="file" name="quote_file" class="form-control" accept="application/pdf">
                         </div>
@@ -87,11 +85,10 @@
                         <div class="col-md-6 mb-3">
                             @if (isset($renewal->po_file))
                                 <label for="po_file" class="form-label">Update PO File &#8226; <a
-                                        href="{{ asset($renewal->po_file) }}" target="_blank">View PO File</a>
-                                </label>
+                                        href="{{ asset('storage/' . $renewal->po_file) }}" target="_blank">View PO
+                                        File</a></label>
                             @else
-                                <label for="po_file" class="form-label">PO File (PDF)
-                                </label>
+                                <label for="po_file" class="form-label">PO File (PDF)</label>
                             @endif
                             <input type="file" name="po_file" class="form-control" accept="application/pdf">
                         </div>
@@ -103,11 +100,10 @@
                         <div class="col-md-6 mb-3">
                             @if (isset($renewal->invoice_file))
                                 <label for="invoice_file" class="form-label">Update Invoice File &#8226; <a
-                                        href="{{ asset($renewal->invoice_file) }}" target="_blank">View Invoice File</a>
-                                </label>
+                                        href="{{ asset('storage/' . $renewal->invoice_file) }}" target="_blank">View
+                                        Invoice File</a></label>
                             @else
-                                <label for="invoice_file" class="form-label">Invoice File (PDF)
-                                </label>
+                                <label for="invoice_file" class="form-label">Invoice File (PDF)</label>
                             @endif
                             <input type="file" name="invoice_file" class="form-control" accept="application/pdf">
                         </div>
